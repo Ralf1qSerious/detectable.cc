@@ -69,7 +69,7 @@ public class MainForm : Form
     Color  _doneRiskColor;
 
     // ── Constructor ────────────────────────────────────────────────────
-    public MainForm(string serverUrl = "https://renderbackend-qdi8.onrender.com")
+    public MainForm(string serverUrl = "https://detectable.cc")
     {
         _serverUrl     = serverUrl;
         _doneRiskColor = Color.FromArgb(46, 204, 113); // default green

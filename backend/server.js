@@ -53,7 +53,7 @@ function saveJSON(file, data) {
 const users    = new Map(Object.entries(loadJSON(USERS_FILE)));
 const sessions = new Map(Object.entries(loadJSON(SESSIONS_FILE)));
 let   auditLog     = loadJSON(AUDIT_FILE, []);
-let   discordWebhooks = {
+const DISCORD_WEBHOOK_DEFAULTS = {
   enabled: false,
   username: 'detectable.cc Audit',
   avatarUrl: '',
@@ -73,7 +73,24 @@ let   discordWebhooks = {
   },
   byAction: {}
 };
-discordWebhooks = { ...discordWebhooks, ...loadJSON(DISCORD_WEBHOOKS_FILE, {}) };
+
+function resolveDiscordWebhookConfig() {
+  const raw = loadJSON(DISCORD_WEBHOOKS_FILE, {});
+  return {
+    ...DISCORD_WEBHOOK_DEFAULTS,
+    ...raw,
+    webhooks: {
+      ...DISCORD_WEBHOOK_DEFAULTS.webhooks,
+      ...(raw.webhooks || {})
+    },
+    byAction: {
+      ...(DISCORD_WEBHOOK_DEFAULTS.byAction || {}),
+      ...(raw.byAction || {})
+    }
+  };
+}
+
+let   discordWebhooks = resolveDiscordWebhookConfig();
 let   profileNotes = loadJSON(NOTES_FILE, {});
 let   config       = { sessionTtlHours: 24, maxSessionsPerChecker: 0, jwtExpiryHours: 12,
                        requireInviteCode: false, alertRules: [],
@@ -150,6 +167,9 @@ function sanitizeDetails(input, includeIp = false) {
 }
 
 async function sendAuditToDiscord(entry) {
+  // Hot-reload config so webhook file edits apply without redeploy.
+  discordWebhooks = resolveDiscordWebhookConfig();
+
   if (!discordWebhooks?.enabled) return;
   const url = pickWebhookUrl(entry.action);
   if (!url) return;
