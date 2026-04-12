@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shared Scan — detectable.cc</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+  <style>
+    body { display: flex; flex-direction: column; min-height: 100vh; background: var(--bg); }
+    .share-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .share-logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); letter-spacing: .04em; }
+    .share-badge { font-size: .72rem; background: rgba(91,110,245,.15); color: var(--accent); border: 1px solid var(--accent); border-radius: 40px; padding: .2rem .7rem; }
+    .share-main { flex: 1; max-width: 860px; margin: 2.5rem auto; padding: 0 1.5rem; width: 100%; }
+    .share-hero { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1.5rem; }
+    .share-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .share-player-name { font-size: 1.5rem; font-weight: 700; color: var(--text); }
+    .share-meta { font-size: .8rem; color: var(--muted); margin-top: .3rem; }
+    .share-verdict { margin-left: auto; text-align: right; }
+    .share-verdict .badge { font-size: 1rem; padding: .4rem 1.2rem; }
+    .share-score { font-size: 2.5rem; font-weight: 800; color: var(--accent); }
+    .share-score-label { font-size: .75rem; color: var(--muted); margin-top: .2rem; }
+    .share-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.2rem; }
+    .share-section h3 { font-size: .85rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 1rem; }
+    .sysinfo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+    .sysinfo-item { background: var(--bg); border-radius: 8px; padding: .7rem 1rem; }
+    .sysinfo-label { font-size: .72rem; color: var(--muted); margin-bottom: .25rem; }
+    .sysinfo-value { font-size: .88rem; color: var(--text); font-weight: 500; word-break: break-all; }
+    .flag-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .5rem; }
+    .flag-item { display: flex; align-items: flex-start; gap: .75rem; background: var(--bg); border-radius: 8px; padding: .75rem 1rem; border-left: 3px solid #f59e0b; }
+    .flag-item-name { font-size: .88rem; color: var(--text); font-weight: 500; }
+    .flag-item-desc { font-size: .78rem; color: var(--muted); margin-top: .15rem; }
+    .flag-sev { font-size: .7rem; font-weight: 700; padding: .15rem .5rem; border-radius: 5px; flex-shrink: 0; text-transform: uppercase; }
+    .flag-sev.high, .flag-sev.critical { background: rgba(239,68,68,.15); color: #ef4444; }
+    .flag-sev.medium { background: rgba(245,158,11,.15); color: #f59e0b; }
+    .flag-sev.low { background: rgba(91,110,245,.15); color: var(--accent); }
+    .share-footer { text-align: center; padding: 2rem; color: var(--muted); font-size: .78rem; }
+    .share-watermark { display: inline-flex; align-items: center; gap: .4rem; background: var(--surface); border: 1px solid var(--border); border-radius: 40px; padding: .3rem .9rem; font-size: .78rem; }
+    .share-watermark a { color: var(--accent); text-decoration: none; }
+    .no-flags { color: var(--muted); font-size: .88rem; padding: .5rem 0; }
+    #loadingState, #errorState { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+    #errorState h2 { font-size: 1.2rem; color: var(--text); margin-bottom: .5rem; }
+  </style>
+</head>
+<body>
+  <header class="share-header">
+    <span class="share-logo">detectable.cc</span>
+    <span class="share-badge">Public Scan Report</span>
+  </header>
+
+  <main class="share-main">
+    <div id="loadingState">Loading scan report…</div>
+    <div id="errorState" style="display:none">
+      <h2>Report not found</h2>
+      <p>This share link may have expired or been revoked.</p>
+    </div>
+    <div id="reportContent" style="display:none">
+      <div class="share-hero">
+        <div class="share-avatar" id="avatarLetter">?</div>
+        <div>
+          <div class="share-player-name" id="playerName">—</div>
+          <div class="share-meta" id="scanDate">—</div>
+        </div>
+        <div class="share-verdict">
+          <div class="badge" id="verdictBadge">—</div>
+          <div class="share-score" id="riskScore">—</div>
+          <div class="share-score-label">Risk Score</div>
+        </div>
+      </div>
+
+      <div class="share-section" id="sysSection">
+        <h3>System Information</h3>
+        <div class="sysinfo-grid" id="sysGrid"></div>
+      </div>
+
+      <div class="share-section">
+        <h3>Flagged Items (<span id="flagCount">0</span>)</h3>
+        <ul class="flag-list" id="flagList"></ul>
+      </div>
+    </div>
+  </main>
+
+  <footer class="share-footer">
+    <span class="share-watermark">Powered by <a href="/">detectable.cc</a></span>
+  </footer>
+
+  <script>
+    const RISK_COLORS = { clean: '#10b981', low: '#5b6ef5', medium: '#f59e0b', high: '#ef4444', critical: '#dc2626' };
+    const RISK_LABELS = { clean: 'Clean', low: 'Low Risk', medium: 'Medium Risk', high: 'High Risk', critical: 'Critical' };
+
+    async function load() {
+      const token = location.pathname.split('/share/')[1];
+      if (!token) { showError(); return; }
+      try {
+        const res = await fetch(`/api/share/${token}`);
+        if (!res.ok) { showError(); return; }
+        const { session } = await res.json();
+        render(session);
+      } catch { showError(); }
+    }
+
+    function showError() {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('errorState').style.display = '';
+    }
+
+    function render(s) {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('reportContent').style.display = '';
+      document.title = `${s.targetName} — detectable.cc`;
+
+      const name = s.targetName || 'Unknown';
+      document.getElementById('playerName').textContent = name;
+      document.getElementById('avatarLetter').textContent = name.charAt(0).toUpperCase();
+      document.getElementById('scanDate').textContent = `Scanned ${new Date(s.updatedAt).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}`;
+
+      const level = s.result?.riskLevel || 'clean';
+      const badge = document.getElementById('verdictBadge');
+      badge.textContent = RISK_LABELS[level] || level;
+      badge.style.background = RISK_COLORS[level] + '22';
+      badge.style.color = RISK_COLORS[level];
+      badge.style.border = `1px solid ${RISK_COLORS[level]}`;
+
+      const score = s.result?.riskScore ?? '—';
+      document.getElementById('riskScore').textContent = score;
+      document.getElementById('riskScore').style.color = RISK_COLORS[level] || 'var(--accent)';
+
+      // System info
+      const sys = s.result?.systemInfo;
+      const grid = document.getElementById('sysGrid');
+      if (sys) {
+        const fields = [['OS', sys.os], ['CPU', sys.cpu], ['GPU', sys.gpu]].filter(([, v]) => v);
+        grid.innerHTML = fields.map(([l, v]) => `
+          <div class="sysinfo-item">
+            <div class="sysinfo-label">${l}</div>
+            <div class="sysinfo-value">${v}</div>
+          </div>`).join('');
+        if (!fields.length) document.getElementById('sysSection').style.display = 'none';
+      } else {
+        document.getElementById('sysSection').style.display = 'none';
+      }
+
+      // Flagged items
+      const flags = s.result?.flaggedItems || [];
+      document.getElementById('flagCount').textContent = flags.length;
+      const list = document.getElementById('flagList');
+      if (!flags.length) {
+        list.innerHTML = '<li class="no-flags">No flagged items detected.</li>';
+      } else {
+        list.innerHTML = flags.map(f => {
+          const sev = (f.severity || 'low').toLowerCase();
+          return `<li class="flag-item">
+            <span class="flag-sev ${sev}">${sev}</span>
+            <div>
+              <div class="flag-item-name">${escHtml(f.name || f.item || 'Unknown')}</div>
+              ${f.description ? `<div class="flag-item-desc">${escHtml(f.description)}</div>` : ''}
+            </div>
+          </li>`;
+        }).join('');
+      }
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    load();
+  </script>
+</body>
+</html>

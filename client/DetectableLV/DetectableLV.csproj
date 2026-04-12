@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AssemblyName>DetectableCC</AssemblyName>
+    <RootNamespace>DetectableLV</RootNamespace>
+    <!-- Assembly / EXE metadata -->
+    <Product>detectable.cc</Product>
+    <AssemblyTitle>detectable.cc Scanner</AssemblyTitle>
+    <Description>FiveM PC Checker Client — detectable.cc</Description>
+    <Company>detectable.cc</Company>
+    <Copyright>© 2026 detectable.cc</Copyright>
+    <Version>4.0.0</Version>
+    <FileVersion>4.0.0.0</FileVersion>
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <!-- App manifest to request admin rights -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Enable WinForms APIs for screenshot support -->
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Management"  Version="8.0.0" />
+    <PackageReference Include="Newtonsoft.Json"    Version="13.0.3" />
+  </ItemGroup>
+</Project>

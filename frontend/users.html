@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>detectable.cc — User Management</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body class="app-body">
+<script>
+  (function(){const t=localStorage.getItem('dlv_theme');if(t)document.documentElement.setAttribute('data-theme',t);})();
+</script>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-dot brand-dot-sm"></span>
+      <span class="sidebar-brand-name">detectable<span class="brand-tld">.lv</span></span>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a href="/dashboard.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Sessions
+      </a>
+      <a href="/profiles.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Profiles
+      </a>
+      <div class="sidebar-section-label">Admin</div>
+      <a href="/users.html" class="sidebar-link active">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Users
+      </a>
+      <a href="/audit.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Audit Log
+      </a>
+      <a href="/settings.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-username" id="sidebarUsername">—</div>
+          <div class="sidebar-role" id="sidebarRoleLabel">Admin</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm sidebar-logout" onclick="logout()" title="Sign out">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="topbar-title">User Management</h1>
+        <span class="topbar-sub">Manage checker and admin accounts</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-clock" id="topbarClock">--:--:--</div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+        <button class="btn btn-primary" onclick="openCreateModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New User
+        </button>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- Announcement banner (loaded from server) -->
+      <div id="announcementBanner" style="display:none"></div>
+
+      <!-- Role legend -->
+      <div class="role-legend">
+        <div class="role-legend-item">
+          <span class="role-badge role-admin">Admin</span>
+          <span class="role-legend-desc">Full access — manage users, view all sessions</span>
+        </div>
+        <div class="role-legend-item">
+          <span class="role-badge role-checker">Checker</span>
+          <span class="role-legend-desc">Can create sessions and view their own results</span>
+        </div>
+      </div>
+
+      <!-- Users table -->
+      <div class="section-card" style="margin-top:16px">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Badges</th>
+                <th>Last Login</th>
+                <th>Created</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody">
+              <tr class="skeleton-row">
+                <td><div style="display:flex;align-items:center;gap:10px"><span class="skeleton skel-avatar" style="width:32px;height:32px"></span><div><div class="skeleton skel-text" style="width:90px;margin-bottom:5px"></div></div></div></td>
+                <td><div class="skeleton skel-text" style="width:55px"></div></td>
+                <td><div class="skeleton skel-text" style="width:80px"></div></td>
+                <td><div class="skeleton skel-text" style="width:110px"></div></td>
+                <td><div class="skeleton skel-text" style="width:80px"></div></td>
+                <td><div style="display:flex;justify-content:flex-end;gap:6px"><div class="skeleton skel-text" style="width:70px;height:26px"></div><div class="skeleton skel-text" style="width:60px;height:26px"></div></div></td>
+              </tr>
+              <tr class="skeleton-row">
+                <td><div style="display:flex;align-items:center;gap:10px"><span class="skeleton skel-avatar" style="width:32px;height:32px"></span><div><div class="skeleton skel-text" style="width:110px;margin-bottom:5px"></div></div></div></td>
+                <td><div class="skeleton skel-text" style="width:55px"></div></td>
+                <td><div class="skeleton skel-text" style="width:40px"></div></td>
+                <td><div class="skeleton skel-text" style="width:120px"></div></td>
+                <td><div class="skeleton skel-text" style="width:80px"></div></td>
+                <td><div style="display:flex;justify-content:flex-end;gap:6px"><div class="skeleton skel-text" style="width:70px;height:26px"></div><div class="skeleton skel-text" style="width:60px;height:26px"></div></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Create User Modal ── -->
+  <div class="modal-overlay hidden" id="createModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Create New User</h2>
+        <button class="modal-close" onclick="closeCreateModal()">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="newUsername" placeholder="username" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="newPassword" placeholder="min. 6 characters" autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label>Role</label>
+          <div class="role-select-group">
+            <label class="role-option" id="roleOptChecker">
+              <input type="radio" name="newRole" value="checker" checked />
+              <div class="role-option-card">
+                <div class="role-option-title"><span class="role-badge role-checker">Checker</span></div>
+                <div class="role-option-desc">Can run and view PC check sessions</div>
+              </div>
+            </label>
+            <label class="role-option" id="roleOptAdmin">
+              <input type="radio" name="newRole" value="admin" />
+              <div class="role-option-card">
+                <div class="role-option-title"><span class="role-badge role-admin">Admin</span></div>
+                <div class="role-option-desc">Full access including user management</div>
+              </div>
+            </label>
+          </div>
+        </div>
+        <div id="createError" class="error-msg hidden"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeCreateModal()">Cancel</button>
+        <button class="btn btn-primary" id="createBtn" onclick="createUser()">Create User</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Reset Password Modal ── -->
+  <div class="modal-overlay hidden" id="resetModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Reset Password</h2>
+        <button class="modal-close" onclick="closeResetModal()">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-6" style="color:var(--text-muted);font-size:13px">
+          Set a new password for <strong id="resetTarget">—</strong>
+        </p>
+        <div class="form-group" style="margin-top:14px">
+          <label>New Password</label>
+          <input type="password" id="resetPassword" placeholder="min. 6 characters" autocomplete="new-password" />
+        </div>
+        <div id="resetError" class="error-msg hidden"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeResetModal()">Cancel</button>
+        <button class="btn btn-primary" id="resetBtn" onclick="doResetPassword()">Reset Password</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const token    = localStorage.getItem('dlv_token');
+    const user     = localStorage.getItem('dlv_user');
+    const role     = localStorage.getItem('dlv_role');
+
+    // Guard: admin only
+    if (!token) { window.location.href = '/'; }
+    if (role !== 'admin') { window.location.href = '/dashboard.html'; }
+
+    // Theme toggle
+    (function(){ const btn=document.getElementById('themeToggle'); if(!btn)return;
+      btn.textContent=document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+      btn.addEventListener('click',()=>{const cur=document.documentElement.getAttribute('data-theme');
+        const next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);
+        localStorage.setItem('dlv_theme',next);btn.textContent=next==='light'?'☀️':'🌙';});})();
+
+    // Sidebar
+    document.getElementById('sidebarAvatar').textContent   = (user || '?')[0].toUpperCase();
+    document.getElementById('sidebarUsername').textContent = user || '—';
+    document.getElementById('sidebarRoleLabel').textContent = role === 'admin' ? 'Administrator' : 'Checker';
+
+    let _resetUsername = null;
+    let _onlineUsers   = new Set();
+
+    // ── Live clock ───────────────────────────────────────────────────────
+    function startClock() {
+      function tick() {
+        const now = new Date();
+        const hh  = String(now.getHours()).padStart(2,'0');
+        const mm  = String(now.getMinutes()).padStart(2,'0');
+        const ss  = String(now.getSeconds()).padStart(2,'0');
+        const el  = document.getElementById('topbarClock');
+        if (el) el.textContent = `${hh}:${mm}:${ss}`;
+      }
+      tick(); setInterval(tick, 1000);
+    }
+    startClock();
+
+    // ── Announcement banner ──────────────────────────────────────────────
+    async function loadBanner() {
+      try {
+        const res  = await apiFetch('/api/banner');
+        const data = await res.json();
+        renderBanner(data.banner);
+      } catch {}
+    }
+    function renderBanner(b) {
+      const el = document.getElementById('announcementBanner');
+      if (!b || !b.text) { el.style.display = 'none'; return; }
+      el.style.display = 'block';
+      const ts = b.at ? new Date(b.at).toLocaleString() : '';
+      el.innerHTML = `<div class="announcement-banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        <div class="announcement-banner-text">
+          <div>${esc(b.text)}</div>
+          <div class="announcement-banner-by">Set by ${esc(b.from)} &middot; ${ts}</div>
+        </div>
+        <button class="announcement-banner-close" onclick="document.getElementById('announcementBanner').style.display='none'">&#x2715;</button>
+      </div>`;
+    }
+
+    // ── Load ────────────────────────────────────────────────────────────
+    async function loadUsers() {
+      const [usersRes, onlineRes] = await Promise.all([
+        apiFetch('/api/users'),
+        apiFetch('/api/admin/online'),
+      ]);
+      const usersData  = await usersRes.json();
+      const onlineData = await onlineRes.json();
+      _onlineUsers = new Set((onlineData.online || []).map(u => u.toLowerCase()));
+      renderUsers(usersData.users || []);
+    }
+
+    function renderUsers(list) {
+      const body = document.getElementById('usersBody');
+      if (!list.length) {
+        body.innerHTML = `<tr><td colspan="6" class="text-muted" style="text-align:center;padding:28px">No users found.</td></tr>`;
+        return;
+      }
+      const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+      body.innerHTML = list.map(u => {
+        const isSelf    = u.username.toLowerCase() === user.toLowerCase();
+        const isAdmin   = u.role === 'admin';
+        const created   = u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—';
+        const lastLogin = u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString() : 'Never';
+        const initials  = u.username.slice(0, 2).toUpperCase();
+        const suspClass = u.suspended ? 'user-suspended' : '';
+        const isOnline  = _onlineUsers.has(u.username.toLowerCase());
+        const isNew     = u.createdAt && (Date.now() - new Date(u.createdAt).getTime()) < SEVEN_DAYS;
+        const badges    = u.badges || [];
+
+        const badgeHtml = [
+          isAdmin                    ? '<span class="ubadge ubadge-admin">⬡ Admin</span>' : '',
+          badges.includes('verified')? '<span class="ubadge ubadge-verified">✓ Verified</span>' : '',
+          badges.includes('vip')     ? '<span class="ubadge ubadge-vip">♦ VIP</span>' : '',
+          badges.includes('trusted') ? '<span class="ubadge ubadge-trusted">★ Trusted</span>' : '',
+          isNew                      ? '<span class="ubadge ubadge-new">New</span>' : '',
+        ].join('');
+
+        const badgeCellHtml = [
+          isAdmin                    ? '<span class="ubadge ubadge-admin">⬡ Admin</span>' : '',
+          badges.includes('verified')? '<span class="ubadge ubadge-verified">✓ Verified</span>' : '',
+          badges.includes('vip')     ? '<span class="ubadge ubadge-vip">♦ VIP</span>' : '',
+          badges.includes('trusted') ? '<span class="ubadge ubadge-trusted">★ Trusted</span>' : '',
+          isNew                      ? '<span class="ubadge ubadge-new">New</span>' : '',
+        ].filter(Boolean).join(' ') || '<span class="text-dim" style="font-size:11px">—</span>';
+
+        return `
+          <tr class="${suspClass}">
+            <td>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="position:relative;flex-shrink:0">
+                  <div class="user-table-avatar ${isAdmin ? 'uta-admin' : 'uta-checker'}">${initials}</div>
+                  <span style="position:absolute;bottom:-1px;right:-1px" title="${isOnline ? 'Has active session' : 'No active session'}">
+                    <span class="${isOnline ? 'online-dot' : 'offline-dot'}"></span>
+                  </span>
+                </div>
+                <div>
+                  <div style="font-weight:600">${esc(u.username)}
+                    ${u.suspended ? '<span class="suspended-badge">Suspended</span>' : ''}
+                    ${badgeHtml}
+                  </div>
+                  ${isSelf ? '<div style="font-size:11px;color:var(--accent)">You</div>' : ''}
+                </div>
+              </div>
+            </td>
+            <td><span class="role-badge role-${u.role}">${cap(u.role)}</span></td>
+            <td>${badgeCellHtml}</td>
+            <td class="text-muted" style="font-size:12px">${lastLogin}</td>
+            <td class="text-muted" style="font-size:12px">${created}</td>
+            <td>
+              <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap">
+                ${!isSelf ? `
+                  <div class="badge-menu-wrap" id="bmw_${esc(u.username)}">
+                    <button class="btn btn-ghost btn-sm" onclick="toggleBadgeMenu('${esc(u.username)}')">
+                      Badges ▾
+                    </button>
+                    <div class="badge-menu hidden" id="bm_${esc(u.username)}">
+                      <label class="badge-menu-item">
+                        <input type="checkbox" ${badges.includes('verified') ? 'checked' : ''} onchange="toggleBadge('${esc(u.username)}','verified',this.checked)">
+                        <span class="ubadge ubadge-verified">✓ Verified</span>
+                      </label>
+                      <label class="badge-menu-item">
+                        <input type="checkbox" ${badges.includes('vip') ? 'checked' : ''} onchange="toggleBadge('${esc(u.username)}','vip',this.checked)">
+                        <span class="ubadge ubadge-vip">♦ VIP</span>
+                      </label>
+                      <label class="badge-menu-item">
+                        <input type="checkbox" ${badges.includes('trusted') ? 'checked' : ''} onchange="toggleBadge('${esc(u.username)}','trusted',this.checked)">
+                        <span class="ubadge ubadge-trusted">★ Trusted</span>
+                      </label>
+                    </div>
+                  </div>
+                  <button class="btn btn-secondary btn-sm" onclick="toggleRole('${esc(u.username)}','${u.role === 'admin' ? 'checker' : 'admin'}')">
+                    ${u.role === 'admin' ? '↓ Checker' : '↑ Admin'}
+                  </button>
+                  <button class="btn ${u.suspended ? 'btn-secondary' : 'btn-ghost'} btn-sm" onclick="toggleSuspend('${esc(u.username)}')">
+                    ${u.suspended ? 'Unsuspend' : 'Suspend'}
+                  </button>
+                  <button class="btn btn-ghost btn-sm" onclick="openResetModal('${esc(u.username)}')">Reset PW</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteUser('${esc(u.username)}')">Delete</button>
+                ` : `<span class="text-dim" style="font-size:12px;padding:5px 8px">Current session</span>`}
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    // ── Badge menu ───────────────────────────────────────────────────────
+    function toggleBadgeMenu(username) {
+      const menu = document.getElementById(`bm_${username}`);
+      const isHidden = menu.classList.contains('hidden');
+      // close all open menus first
+      document.querySelectorAll('.badge-menu').forEach(m => m.classList.add('hidden'));
+      if (isHidden) menu.classList.remove('hidden');
+    }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.badge-menu-wrap')) {
+        document.querySelectorAll('.badge-menu').forEach(m => m.classList.add('hidden'));
+      }
+    });
+    async function toggleBadge(username, badge, enabled) {
+      // Gather all currently checked badges from the open menu
+      const menu = document.getElementById(`bm_${username}`);
+      const checks = menu.querySelectorAll('input[type=checkbox]');
+      const BADGE_VALUES = ['verified', 'vip', 'trusted'];
+      const newBadges = BADGE_VALUES.filter((b, i) => checks[i] && checks[i].checked);
+      // Apply the current toggle
+      const corrected = enabled
+        ? [...new Set([...newBadges, badge])]
+        : newBadges.filter(b => b !== badge);
+      const res  = await apiFetch(`/api/users/${username}/badges`, 'PATCH', { badges: corrected });
+      const data = await res.json();
+      if (!res.ok) return toast(data.error || 'Failed', 'error');
+      toast(`Badge updated for ${username}`, 'success');
+      loadUsers();
+    }
+
+    // ── Actions ─────────────────────────────────────────────────────────
+    async function toggleSuspend(username) {
+      const res = await apiFetch(`/api/users/${username}/suspend`, 'PATCH');
+      const data = await res.json();
+      if (!res.ok) return toast(data.error || 'Failed', 'error');
+      toast(data.message, 'info');
+      loadUsers();
+    }
+
+    async function toggleRole(username, newRole) {
+      const res = await apiFetch(`/api/users/${username}`, 'PATCH', { role: newRole });
+      const data = await res.json();
+      if (!res.ok) return toast(data.error, 'error');
+      toast(`${username} is now ${newRole}`, 'success');
+      loadUsers();
+    }
+
+    async function deleteUser(username) {
+      if (!confirm(`Delete user "${username}"? This cannot be undone.`)) return;
+      const res = await apiFetch(`/api/users/${username}`, 'DELETE');
+      const data = await res.json();
+      if (!res.ok) return toast(data.error, 'error');
+      toast(`${username} deleted`, 'info');
+      loadUsers();
+    }
+
+    // ── Create Modal ────────────────────────────────────────────────────
+    function openCreateModal() {
+      document.getElementById('newUsername').value = '';
+      document.getElementById('newPassword').value = '';
+      document.querySelector('input[name="newRole"][value="checker"]').checked = true;
+      document.getElementById('createError').classList.add('hidden');
+      document.getElementById('createModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('newUsername').focus(), 50);
+    }
+    function closeCreateModal() { document.getElementById('createModal').classList.add('hidden'); }
+
+    async function createUser() {
+      const username = document.getElementById('newUsername').value.trim();
+      const password = document.getElementById('newPassword').value;
+      const role     = document.querySelector('input[name="newRole"]:checked')?.value || 'checker';
+      const err      = document.getElementById('createError');
+      const btn      = document.getElementById('createBtn');
+      err.classList.add('hidden');
+      if (!username) { err.textContent = 'Username is required.'; err.classList.remove('hidden'); return; }
+      if (password.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.classList.remove('hidden'); return; }
+      btn.disabled = true; btn.textContent = 'Creating…';
+      try {
+        const res  = await apiFetch('/api/users', 'POST', { username, password, role });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        closeCreateModal();
+        toast(`User "${username}" created as ${role}`, 'success');
+        loadUsers();
+      } catch (e) { err.textContent = e.message; err.classList.remove('hidden'); }
+      btn.disabled = false; btn.textContent = 'Create User';
+    }
+
+    // ── Reset Password Modal ─────────────────────────────────────────────
+    function openResetModal(username) {
+      _resetUsername = username;
+      document.getElementById('resetTarget').textContent = username;
+      document.getElementById('resetPassword').value = '';
+      document.getElementById('resetError').classList.add('hidden');
+      document.getElementById('resetModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('resetPassword').focus(), 50);
+    }
+    function closeResetModal() { document.getElementById('resetModal').classList.add('hidden'); _resetUsername = null; }
+
+    async function doResetPassword() {
+      const password = document.getElementById('resetPassword').value;
+      const err = document.getElementById('resetError');
+      const btn = document.getElementById('resetBtn');
+      err.classList.add('hidden');
+      if (password.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.classList.remove('hidden'); return; }
+      btn.disabled = true; btn.textContent = 'Resetting…';
+      try {
+        const res  = await apiFetch(`/api/users/${_resetUsername}/reset-password`, 'POST', { password });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        closeResetModal();
+        toast(`Password reset for "${_resetUsername}"`, 'success');
+      } catch (e) { err.textContent = e.message; err.classList.remove('hidden'); }
+      btn.disabled = false; btn.textContent = 'Reset Password';
+    }
+
+    // ── Utils ────────────────────────────────────────────────────────────
+    function cap(str) { return str ? str[0].toUpperCase() + str.slice(1) : str; }
+    function logout() { localStorage.clear(); window.location.href = '/'; }
+    function esc(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function apiFetch(url, method = 'GET', body = null) {
+      const opts = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } };
+      if (body) opts.body = JSON.stringify(body);
+      return fetch(url, opts).then(r => { if (r.status === 401) logout(); return r; });
+    }
+    function toast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`; el.textContent = msg;
+      c.appendChild(el);
+      setTimeout(() => { el.classList.add('hiding'); el.addEventListener('animationend', () => el.remove()); }, 3000);
+    }
+
+    // Enter key shortcuts
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      if (!document.getElementById('createModal').classList.contains('hidden')) createUser();
+      if (!document.getElementById('resetModal').classList.contains('hidden')) doResetPassword();
+    });
+
+    loadBanner();
+    loadUsers();
+  </script>
+</body>
+</html>

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>detectable.cc — Settings</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+  <style>
+    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 860px; }
+    @media(max-width: 720px) { .settings-grid { grid-template-columns: 1fr; } }
+    .settings-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+    }
+    .settings-card-header {
+      padding: 14px 20px; background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .settings-card-header svg { width: 16px; height: 16px; stroke: var(--accent); flex-shrink: 0; }
+    .settings-card-title { font-size: 13px; font-weight: 700; }
+    .settings-card-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+    .setting-row { display: flex; flex-direction: column; gap: 6px; }
+    .setting-label {
+      font-size: 12.5px; font-weight: 600; color: var(--text);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .setting-hint { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; }
+    .setting-input {
+      width: 100%; padding: 9px 12px;
+      background: var(--bg3); border: 1px solid var(--border2);
+      border-radius: var(--radius); color: var(--text);
+      font-size: 14px; font-family: var(--font-mono); outline: none;
+      transition: border-color .15s;
+    }
+    .setting-input:focus { border-color: var(--accent); }
+    .setting-input.changed { border-color: var(--yellow); }
+    .setting-badge {
+      font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: .4px;
+    }
+    .sb-session { background: rgba(52,152,219,.12); color: var(--blue); border: 1px solid rgba(52,152,219,.2); }
+    .sb-auth    { background: rgba(155,89,182,.12); color: var(--purple); border: 1px solid rgba(155,89,182,.2); }
+    .sb-limit   { background: rgba(243,156,18,.12); color: var(--yellow); border: 1px solid rgba(243,156,18,.2); }
+    .settings-footer {
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px 20px; background: var(--bg3);
+      border-top: 1px solid var(--border);
+    }
+    .save-indicator {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--green); opacity: 0;
+      transition: opacity .3s;
+    }
+    .save-indicator.visible { opacity: 1; }
+    .save-indicator svg { width: 13px; height: 13px; stroke: var(--green); }
+    .unsaved-bar {
+      display: none; align-items: center; gap: 10px; padding: 10px 16px;
+      background: rgba(243,156,18,.08); border: 1px solid rgba(243,156,18,.2);
+      border-radius: var(--radius); margin-bottom: 18px; font-size: 13px;
+    }
+    .unsaved-bar.visible { display: flex; }
+    .unsaved-bar svg { width: 15px; height: 15px; stroke: var(--yellow); flex-shrink: 0; }
+    .danger-zone {
+      max-width: 860px; margin-top: 28px;
+      background: rgba(231,76,60,.04); border: 1px solid rgba(231,76,60,.2);
+      border-radius: var(--radius-lg); overflow: hidden;
+    }
+    .danger-zone-header {
+      padding: 14px 20px; background: rgba(231,76,60,.07);
+      border-bottom: 1px solid rgba(231,76,60,.2);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .danger-zone-header svg { width: 16px; height: 16px; stroke: var(--red); flex-shrink: 0; }
+    .danger-zone-title { font-size: 13px; font-weight: 700; color: var(--red); }
+    .danger-zone-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .danger-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 14px 16px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .danger-row-text { flex: 1; }
+    .danger-row-title { font-size: 13px; font-weight: 600; }
+    .danger-row-hint  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  </style>
+</head>
+<body class="app-body">
+<script>
+  (function(){const t=localStorage.getItem('dlv_theme');if(t)document.documentElement.setAttribute('data-theme',t);})();
+</script>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-dot brand-dot-sm"></span>
+      <span class="sidebar-brand-name">detectable<span class="brand-tld">.lv</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/dashboard.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Sessions
+      </a>
+      <a href="/profiles.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Profiles
+      </a>
+      <div class="sidebar-section-label">Admin</div>
+      <a href="/users.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Users
+      </a>
+      <a href="/audit.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Audit Log
+      </a>
+      <a href="/settings.html" class="sidebar-link active">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-username" id="sidebarUsername">—</div>
+          <div class="sidebar-role" id="sidebarRoleLabel">Administrator</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm sidebar-logout" onclick="logout()" title="Sign out">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="topbar-title">Server Settings</h1>
+        <span class="topbar-sub">Configure runtime behaviour — changes take effect immediately</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-clock" id="topbarClock">--:--:--</div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- Unsaved indicator -->
+      <div class="unsaved-bar" id="unsavedBar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        You have unsaved changes.
+        <button class="btn btn-primary btn-sm" onclick="saveSettings()" style="margin-left:auto">Save now</button>
+        <button class="btn btn-ghost btn-sm" onclick="loadSettings()">Discard</button>
+      </div>
+
+      <div class="settings-grid">
+
+        <!-- Sessions card -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span class="settings-card-title">Session Settings</span>
+          </div>
+          <div class="settings-card-body">
+            <div class="setting-row">
+              <div class="setting-label">
+                Session TTL
+                <span class="setting-badge sb-session">hours</span>
+              </div>
+              <div class="setting-hint">How long a waiting session stays open before it automatically expires. Default: 24h.</div>
+              <input type="number" id="sessionTtlHours" class="setting-input" min="1" max="720" placeholder="24" oninput="markChanged(this)" />
+            </div>
+            <div class="setting-row">
+              <div class="setting-label">
+                Max Concurrent Sessions Per Checker
+                <span class="setting-badge sb-limit">limit</span>
+              </div>
+              <div class="setting-hint">Maximum number of active sessions a single checker can have open. Set to <strong>0</strong> for unlimited.</div>
+              <input type="number" id="maxSessionsPerChecker" class="setting-input" min="0" max="100" placeholder="0" oninput="markChanged(this)" />
+            </div>
+          </div>
+          <div class="settings-footer">
+            <button class="btn btn-primary btn-sm" onclick="saveSettings()">Save Changes</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadSettings()">Reset</button>
+            <div class="save-indicator" id="saveIndicator1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Saved
+            </div>
+          </div>
+        </div>
+
+        <!-- Auth card -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span class="settings-card-title">Authentication</span>
+          </div>
+          <div class="settings-card-body">
+            <div class="setting-row">
+              <div class="setting-label">
+                JWT Token Expiry
+                <span class="setting-badge sb-auth">hours</span>
+              </div>
+              <div class="setting-hint">How long a login session lasts before the user must sign in again. Default: 12h. <strong>All users will need to re-login after saving.</strong></div>
+              <input type="number" id="jwtExpiryHours" class="setting-input" min="1" max="720" placeholder="12" oninput="markChanged(this)" />
+            </div>
+            <div class="setting-row">
+              <div class="setting-label">Require Invite Code for Registration</div>
+              <div class="setting-hint">When enabled, new accounts can only be created with a valid invite code generated by an admin.</div>
+              <label style="display:flex;align-items:center;gap:8px;margin-top:4px;cursor:pointer">
+                <input type="checkbox" id="requireInviteCode" style="accent-color:var(--accent);width:16px;height:16px" onchange="markChanged(this)" />
+                <span style="font-size:13px">Require invite code</span>
+              </label>
+            </div>
+            <div class="setting-row" style="padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius)">
+              <div style="font-size:12px;color:var(--text-muted);line-height:1.6">
+                <strong style="color:var(--text)">Note:</strong> Changing JWT expiry does not invalidate existing tokens immediately — they will expire at their original time. To force all users to re-login, you would need to change the JWT secret in the server environment.
+              </div>
+            </div>
+          </div>
+          <div class="settings-footer">
+            <button class="btn btn-primary btn-sm" onclick="saveSettings()">Save Changes</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadSettings()">Reset</button>
+            <div class="save-indicator" id="saveIndicator2">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Saved
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Danger zone -->
+      <div class="danger-zone">
+        <div class="danger-zone-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span class="danger-zone-title">Danger Zone</span>
+        </div>
+        <div class="danger-zone-body">
+          <div class="danger-row">
+            <div class="danger-row-text">
+              <div class="danger-row-title">Export All Data</div>
+              <div class="danger-row-hint">Download a full CSV of every session ever recorded. Action is logged.</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="exportCSV()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export CSV
+            </button>
+          </div>
+          <div class="danger-row">
+            <div class="danger-row-text">
+              <div class="danger-row-title">Reset to Defaults</div>
+              <div class="danger-row-hint">Restore all settings to their factory defaults (TTL: 24h, Max: 0, JWT: 12h).</div>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="resetToDefaults()">Reset Defaults</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Announcement banner management -->
+      <div class="settings-card" style="max-width:860px;margin-top:20px">
+        <div class="settings-card-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <span class="settings-card-title">Announcement Banner</span>
+        </div>
+        <div class="settings-card-body">
+          <div id="currentBannerDisplay" style="display:none;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:4px">
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">Current banner:</div>
+            <div id="currentBannerText" style="font-size:13px;font-weight:500"></div>
+            <div id="currentBannerMeta" style="font-size:11px;color:var(--text-dim);margin-top:4px"></div>
+          </div>
+          <div style="display:none" id="noBannerNote">
+            <div style="font-size:12.5px;color:var(--text-muted)">No active announcement banner.</div>
+          </div>
+          <div class="setting-row" style="margin-top:12px">
+            <div class="setting-label">Banner Message</div>
+            <div class="setting-hint">This text appears at the top of all pages for all users.</div>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+              <input type="text" id="bannerText" class="setting-input" placeholder="e.g. Maintenance scheduled at 22:00 UTC tonight" style="flex:1;min-width:200px" />
+              <select id="bannerSeverity" class="form-select" style="width:120px">
+                <option value="info">&#8505; Info</option>
+                <option value="warning">⚠ Warning</option>
+                <option value="critical">🔴 Critical</option>
+              </select>
+              <input type="datetime-local" id="bannerExpiry" class="setting-input" style="width:200px" title="Optional: banner auto-expires at this time" />
+              <button class="btn btn-primary btn-sm" onclick="setBanner()">Set Banner</button>
+              <button class="btn btn-danger btn-sm" onclick="clearBanner()">Clear</button>
+            </div>
+            <div style="font-size:.75rem;color:var(--text-muted);margin-top:.35rem">Expiry is optional &mdash; leave blank for permanent.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert Rules -->
+      <div class="settings-card" style="max-width:860px;margin-top:20px">
+        <div class="settings-card-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="settings-card-title">Alert Rules</span>
+        </div>
+        <div class="settings-card-body">
+          <div style="font-size:12.5px;color:var(--muted)">Rules are evaluated when a scan completes. Auto-ban immediately adds the player to the blacklist.</div>
+          <div id="alertRulesList" style="display:flex;flex-direction:column;gap:.6rem"></div>
+          <button class="btn btn-ghost btn-sm" onclick="addAlertRule()" style="align-self:flex-start;margin-top:.4rem">+ Add Rule</button>
+        </div>
+        <div class="settings-footer">
+          <button class="btn btn-primary btn-sm" onclick="saveAlertRules()">Save Rules</button>
+          <div class="save-indicator" id="alertRulesSaved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Saved</div>
+        </div>
+      </div>
+
+      <!-- Invite Codes -->
+      <div class="settings-card" style="max-width:860px;margin-top:20px">
+        <div class="settings-card-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          <span class="settings-card-title">Invite Codes</span>
+        </div>
+        <div class="settings-card-body">
+          <div style="font-size:12.5px;color:var(--muted)">Generate invite codes for new checker registration. Enable "Require invite code" in Authentication settings.</div>
+          <div style="display:flex;gap:.5rem;align-items:flex-end;flex-wrap:wrap;margin-top:.5rem">
+            <div>
+              <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Max uses</label>
+              <input type="number" id="inviteMaxUses" min="1" max="100" value="1" style="width:80px;padding:.4rem .6rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.85rem;outline:none" />
+            </div>
+            <div>
+              <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Expires (optional)</label>
+              <input type="datetime-local" id="inviteExpiry" style="padding:.4rem .6rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.82rem;outline:none" />
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="generateInvite()" style="align-self:flex-end">Generate Code</button>
+          </div>
+          <div id="inviteList" style="display:flex;flex-direction:column;gap:.5rem;margin-top:.75rem"></div>
+        </div>
+      </div>
+
+      <!-- Session Templates -->
+      <div class="settings-card" style="max-width:860px;margin-top:20px">
+        <div class="settings-card-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span class="settings-card-title">Session Templates</span>
+        </div>
+        <div class="settings-card-body">
+          <div style="font-size:12.5px;color:var(--muted)">Quick-fill presets for new session notes. Checkers can select these when creating a session.</div>
+          <div style="display:flex;gap:.5rem;align-items:flex-end;flex-wrap:wrap">
+            <div style="flex:1;min-width:140px">
+              <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:.3rem">Name</label>
+              <input type="text" id="tplName" placeholder="e.g. Suspected macro" maxlength="80" style="width:100%;padding:.5rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.85rem;outline:none" />
+            </div>
+            <div style="flex:2;min-width:180px">
+              <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:.3rem">Description</label>
+              <input type="text" id="tplDesc" placeholder="e.g. Player suspected of using macro software" maxlength="200" style="width:100%;padding:.5rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.85rem;outline:none" />
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="addTemplate()" style="flex-shrink:0">Add</button>
+          </div>
+          <div id="templateList" style="display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script>
+    const API   = 'http://localhost:3000';
+    const token = localStorage.getItem('dlv_token');
+    const user  = localStorage.getItem('dlv_user');
+    const role  = localStorage.getItem('dlv_role');
+
+    if (!token || role !== 'admin') { location.href = '/index.html'; }
+
+    document.getElementById('sidebarUsername').textContent = user || '—';
+    document.getElementById('sidebarAvatar').textContent   = (user || '?').slice(0, 2).toUpperCase();
+
+    // Theme toggle
+    (function(){ const btn=document.getElementById('themeToggle'); if(!btn)return;
+      btn.textContent=document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+      btn.addEventListener('click',()=>{const cur=document.documentElement.getAttribute('data-theme');
+        const next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);
+        localStorage.setItem('dlv_theme',next);btn.textContent=next==='light'?'☀️':'🌙';});})();
+
+    let hasChanges = false;
+
+    function logout() { localStorage.clear(); location.href = '/index.html'; }
+
+    // ── Live clock ────────────────────────────────────────────────────
+    (function startClock() {
+      function tick() {
+        const now = new Date();
+        const hh  = String(now.getHours()).padStart(2,'0');
+        const mm  = String(now.getMinutes()).padStart(2,'0');
+        const ss  = String(now.getSeconds()).padStart(2,'0');
+        const el  = document.getElementById('topbarClock');
+        if (el) el.textContent = `${hh}:${mm}:${ss}`;
+      }
+      tick(); setInterval(tick, 1000);
+    })();
+
+    function toast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast toast-${type}`;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    async function apiFetch(path, method = 'GET', body) {
+      const opts = { method, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } };
+      if (body) opts.body = JSON.stringify(body);
+      return fetch(API + path, opts);
+    }
+
+    function markChanged(el) {
+      el.classList.add('changed');
+      hasChanges = true;
+      document.getElementById('unsavedBar').classList.add('visible');
+    }
+
+    function clearChanged() {
+      document.querySelectorAll('.setting-input').forEach(i => i.classList.remove('changed'));
+      hasChanges = false;
+      document.getElementById('unsavedBar').classList.remove('visible');
+    }
+
+    function flashSaved() {
+      ['saveIndicator1','saveIndicator2'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.add('visible');
+        setTimeout(() => el.classList.remove('visible'), 2500);
+      });
+    }
+
+    async function loadSettings() {
+      const res = await apiFetch('/api/config');
+      if (!res.ok) { toast('Failed to load settings', 'error'); return; }
+      const data = await res.json();
+      const cfg = data.config || data;
+      document.getElementById('sessionTtlHours').value       = cfg.sessionTtlHours       ?? 24;
+      document.getElementById('maxSessionsPerChecker').value  = cfg.maxSessionsPerChecker ?? 0;
+      document.getElementById('jwtExpiryHours').value         = cfg.jwtExpiryHours        ?? 12;
+      document.getElementById('requireInviteCode').checked    = !!cfg.requireInviteCode;
+      clearChanged();
+    }
+
+    async function saveSettings() {
+      const sessionTtlHours       = parseInt(document.getElementById('sessionTtlHours').value, 10);
+      const maxSessionsPerChecker  = parseInt(document.getElementById('maxSessionsPerChecker').value, 10);
+      const jwtExpiryHours         = parseInt(document.getElementById('jwtExpiryHours').value, 10);
+      const requireInviteCode      = document.getElementById('requireInviteCode').checked;
+
+      if ([sessionTtlHours, maxSessionsPerChecker, jwtExpiryHours].some(Number.isNaN)) {
+        toast('All fields must be valid numbers', 'error'); return;
+      }
+      if (sessionTtlHours < 1 || jwtExpiryHours < 1 || maxSessionsPerChecker < 0) {
+        toast('Values out of range', 'error'); return;
+      }
+
+      const res = await apiFetch('/api/config', 'POST', { sessionTtlHours, maxSessionsPerChecker, jwtExpiryHours, requireInviteCode });
+      const data = await res.json();
+      if (!res.ok) { toast(data.error || 'Failed to save', 'error'); return; }
+      toast('Settings saved successfully', 'success');
+      clearChanged();
+      flashSaved();
+    }
+
+    async function resetToDefaults() {
+      if (!confirm('Reset all settings to factory defaults?')) return;
+      document.getElementById('sessionTtlHours').value      = 24;
+      document.getElementById('maxSessionsPerChecker').value = 0;
+      document.getElementById('jwtExpiryHours').value        = 12;
+      document.getElementById('requireInviteCode').checked   = false;
+      await saveSettings();
+    }
+
+    async function exportCSV() {
+      const res = await fetch(`${API}/api/admin/export`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) { toast('Export failed', 'error'); return; }
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = `sessions-${Date.now()}.csv`; a.click();
+      URL.revokeObjectURL(url);
+      toast('Export started', 'success');
+    }
+
+    // ── Announcement banner management ──────────────────────────────────
+    async function loadCurrentBanner() {
+      try {
+        const res  = await apiFetch('/api/banner');
+        const data = await res.json();
+        const b    = data.banner;
+        document.getElementById('currentBannerDisplay').style.display = b ? '' : 'none';
+        document.getElementById('noBannerNote').style.display = b ? 'none' : '';
+        if (b) {
+          const sevColor = { info: 'var(--accent)', warning: '#f59e0b', critical: '#ef4444' }[b.severity || 'info'] || 'var(--accent)';
+          document.getElementById('currentBannerText').innerHTML = `<span style="color:${sevColor};font-weight:700">[${(b.severity||'info').toUpperCase()}]</span> ${b.text || ''}`;
+          let meta = `Set by ${b.from} on ${b.at ? new Date(b.at).toLocaleString() : 'unknown'}`;
+          if (b.expiresAt) meta += `  \u00b7  Expires: ${new Date(b.expiresAt).toLocaleString()}`;
+          document.getElementById('currentBannerMeta').textContent = meta;
+          document.getElementById('bannerText').value = b.text || '';
+          document.getElementById('bannerSeverity').value = b.severity || 'info';
+          if (b.expiresAt) {
+            const dt  = new Date(b.expiresAt);
+            const pad = n => String(n).padStart(2,'0');
+            document.getElementById('bannerExpiry').value = `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+          } else {
+            document.getElementById('bannerExpiry').value = '';
+          }
+        }
+      } catch {}
+    }
+
+    async function setBanner() {
+      const text     = document.getElementById('bannerText').value.trim();
+      const severity = document.getElementById('bannerSeverity').value;
+      const expiry   = document.getElementById('bannerExpiry').value;
+      if (!text) { toast('Enter a banner message first', 'error'); return; }
+      const body = { text, severity };
+      if (expiry) body.expiresAt = new Date(expiry).toISOString();
+      const res  = await apiFetch('/api/banner', 'POST', body);
+      const data = await res.json();
+      if (!res.ok) { toast(data.error || 'Failed', 'error'); return; }
+      toast('Announcement banner set', 'success');
+      loadCurrentBanner();
+    }
+
+    async function clearBanner() {
+      if (!confirm('Clear the current announcement banner?')) return;
+      const res = await apiFetch('/api/banner', 'DELETE');
+      if (!res.ok) { toast('Failed to clear banner', 'error'); return; }
+      document.getElementById('bannerText').value = '';
+      toast('Banner cleared', 'info');
+      loadCurrentBanner();
+    }
+
+    loadSettings();
+    loadCurrentBanner();
+    loadAlertRules();
+    loadInvites();
+    loadTemplates();
+
+    // ── Alert Rules ───────────────────────────────────────────────────────
+    let alertRules = [];
+    async function loadAlertRules() {
+      try {
+        const res = await apiFetch('/api/alert-rules');
+        const data = await res.json();
+        alertRules = data.rules || [];
+        renderAlertRules();
+      } catch {}
+    }
+    function renderAlertRules() {
+      const el = document.getElementById('alertRulesList');
+      if (!alertRules.length) { el.innerHTML = '<div style="font-size:12.5px;color:var(--muted)">No rules yet.</div>'; return; }
+      el.innerHTML = alertRules.map((r, i) => `
+        <div class="alert-rule-row">
+          <label class="alert-rule-toggle">
+            <input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="alertRules[${i}].enabled=this.checked" />
+          </label>
+          <input type="text" value="${esc(r.name)}" placeholder="Rule name" maxlength="100" style="flex:1;min-width:80px;padding:.4rem .6rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.8rem;outline:none" onchange="alertRules[${i}].name=this.value" />
+          <select style="padding:.4rem .6rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.8rem;outline:none" onchange="alertRules[${i}].conditionType=this.value">
+            <option value="score" ${r.conditionType==='score'?'selected':''}>Score ≥</option>
+            <option value="level" ${r.conditionType==='level'?'selected':''}>Level ≥</option>
+          </select>
+          ${r.conditionType === 'level'
+            ? `<select style="padding:.4rem .6rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.8rem;outline:none" onchange="alertRules[${i}].threshold=this.value">
+                ${['clean','low','medium','high','critical'].map(l=>`<option value="${l}" ${r.threshold===l?'selected':''}>${l}</option>`).join('')}
+               </select>`
+            : `<input type="number" value="${r.threshold||50}" min="0" max="100" style="width:60px;padding:.4rem .6rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.8rem;outline:none;text-align:center" onchange="alertRules[${i}].threshold=parseInt(this.value)" />`
+          }
+          <select style="padding:.4rem .6rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.8rem;outline:none" onchange="alertRules[${i}].action=this.value">
+            <option value="flag" ${r.action==='flag'?'selected':''}>Flag only</option>
+            <option value="auto_ban" ${r.action==='auto_ban'?'selected':''}>Auto-ban</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="alertRules.splice(${i},1);renderAlertRules()" style="color:var(--red);padding:.3rem .5rem">✕</button>
+        </div>`).join('');
+    }
+    function addAlertRule() {
+      alertRules.push({ id: crypto.randomUUID(), name: '', conditionType: 'score', threshold: 70, action: 'flag', enabled: true });
+      renderAlertRules();
+    }
+    async function saveAlertRules() {
+      const res = await apiFetch('/api/alert-rules', 'PUT', { rules: alertRules });
+      if (res.ok) {
+        toast('Alert rules saved', 'success');
+        const ind = document.getElementById('alertRulesSaved');
+        ind.classList.add('visible'); setTimeout(()=>ind.classList.remove('visible'), 2500);
+      } else { toast('Failed to save rules', 'error'); }
+    }
+
+    // ── Invite Codes ──────────────────────────────────────────────────────
+    async function loadInvites() {
+      try {
+        const res = await apiFetch('/api/invites');
+        const data = await res.json();
+        renderInvites(data.invites || []);
+      } catch {}
+    }
+    function renderInvites(invites) {
+      const el = document.getElementById('inviteList');
+      if (!invites.length) { el.innerHTML = '<div style="font-size:12.5px;color:var(--muted)">No invite codes yet.</div>'; return; }
+      const now = Date.now();
+      el.innerHTML = invites.map(inv => {
+        const usedCount = Array.isArray(inv.usedBy) ? inv.usedBy.length : (inv.usedBy ? 1 : 0);
+        const maxUses = inv.maxUses || 1;
+        const expired = inv.expiresAt && new Date(inv.expiresAt) < new Date();
+        const exhausted = usedCount >= maxUses;
+        const inactive = expired || exhausted;
+        const statusColor = inactive ? 'var(--text-muted)' : 'var(--accent)';
+        let statusText = '';
+        if (expired) statusText = 'Expired';
+        else if (exhausted) statusText = `Used (${usedCount}/${maxUses})`;
+        else statusText = `${usedCount}/${maxUses} uses`;
+        const expiryStr = inv.expiresAt
+          ? ` · Exp ${new Date(inv.expiresAt).toLocaleDateString()}` : '';
+        const userStr = usedCount > 0
+          ? `Used by: ${(Array.isArray(inv.usedBy) ? inv.usedBy : [inv.usedBy]).map(u=>esc(u)).join(', ')}` : '';
+        return `<div style="display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;opacity:${inactive?'.6':'1'}">
+          <code style="font-family:var(--font-mono);font-size:.88rem;font-weight:700;letter-spacing:.08em;color:${statusColor}">${esc(inv.code)}</code>
+          <span style="font-size:.75rem;color:var(--text-muted)">${statusText}${expiryStr}</span>
+          ${userStr ? `<span style="font-size:.72rem;color:var(--text-muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${userStr}</span>` : '<span style="flex:1"></span>'}
+          ${!inactive ? `<button class="btn btn-ghost btn-sm" onclick="copyInvite('${inv.code}')" style="font-size:.75rem;padding:.25rem .5rem">Copy</button>` : ''}
+          <span style="font-size:.72rem;color:var(--text-muted);white-space:nowrap">${new Date(inv.createdAt).toLocaleDateString()}</span>
+          <button class="btn btn-ghost btn-sm" onclick="deleteInvite('${inv.code}')" style="color:var(--red);padding:.25rem .5rem">✕</button>
+        </div>`;
+      }).join('');
+    }
+    async function generateInvite() {
+      const maxUses  = parseInt(document.getElementById('inviteMaxUses')?.value) || 1;
+      const expiry   = document.getElementById('inviteExpiry')?.value;
+      const body = { maxUses };
+      if (expiry) body.expiresAt = new Date(expiry).toISOString();
+      const res = await apiFetch('/api/invites', 'POST', body);
+      const data = await res.json();
+      if (res.ok) {
+        toast(`Code ${data.invite.code} created (${maxUses} use${maxUses > 1 ? 's' : ''})`, 'success');
+        if (document.getElementById('inviteExpiry')) document.getElementById('inviteExpiry').value = '';
+        if (document.getElementById('inviteMaxUses')) document.getElementById('inviteMaxUses').value = '1';
+        loadInvites();
+      } else toast('Failed to generate invite', 'error');
+    }
+    function copyInvite(code) { navigator.clipboard.writeText(code).then(()=>toast('Code copied!','success')); }
+    async function deleteInvite(code) {
+      if (!confirm(`Delete invite code ${code}?`)) return;
+      const res = await apiFetch(`/api/invites/${code}`, 'DELETE');
+      if (res.ok) { toast('Invite deleted', 'info'); loadInvites(); }
+      else toast('Failed', 'error');
+    }
+
+    // ── Templates ─────────────────────────────────────────────────────────
+    async function loadTemplates() {
+      try {
+        const res = await apiFetch('/api/templates');
+        const data = await res.json();
+        renderTemplates(data.templates || []);
+      } catch {}
+    }
+    function renderTemplates(templates) {
+      const el = document.getElementById('templateList');
+      if (!templates.length) { el.innerHTML = '<div style="font-size:12.5px;color:var(--muted)">No templates yet.</div>'; return; }
+      el.innerHTML = templates.map(t => `
+        <div style="display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:.85rem;font-weight:600;color:var(--text)">${esc(t.name)}</div>
+            ${t.description ? `<div style="font-size:.78rem;color:var(--muted);margin-top:.1rem">${esc(t.description)}</div>` : ''}
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="deleteTemplate('${t.id}')" style="color:var(--red);padding:.25rem .5rem;flex-shrink:0">✕</button>
+        </div>`).join('');
+    }
+    async function addTemplate() {
+      const name = document.getElementById('tplName').value.trim();
+      const description = document.getElementById('tplDesc').value.trim();
+      if (!name) { toast('Template name required', 'error'); return; }
+      const res = await apiFetch('/api/templates', 'POST', { name, description });
+      const data = await res.json();
+      if (res.ok) {
+        document.getElementById('tplName').value = '';
+        document.getElementById('tplDesc').value = '';
+        toast('Template added', 'success');
+        loadTemplates();
+      } else toast(data.error || 'Failed', 'error');
+    }
+    async function deleteTemplate(id) {
+      const res = await apiFetch(`/api/templates/${id}`, 'DELETE');
+      if (res.ok) { toast('Template deleted', 'info'); loadTemplates(); }
+      else toast('Failed', 'error');
+    }
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  </script>
+</body>
+</html>
+

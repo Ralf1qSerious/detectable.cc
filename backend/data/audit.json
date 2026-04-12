@@ -1,0 +1,1464 @@
+[
+  {
+    "id": "f7f4df55-b45e-44d6-89db-25b02f977184",
+    "action": "session_deleted",
+    "by": "Tester",
+    "details": {
+      "sessionId": "48a1db59-12b8-4250-9ec8-dc5f15c9d8f6",
+      "targetName": "Ralf1q",
+      "bulk": true
+    },
+    "timestamp": "2026-04-11T23:51:36.976Z"
+  },
+  {
+    "id": "dfe2ad60-c0eb-4595-82ee-d74d9598c280",
+    "action": "session_deleted",
+    "by": "Tester",
+    "details": {
+      "sessionId": "d290460b-60ef-4225-a690-4b1787609c57",
+      "targetName": "gg",
+      "bulk": true
+    },
+    "timestamp": "2026-04-11T23:51:36.975Z"
+  },
+  {
+    "id": "e98f0891-6b32-474a-ba2e-a1e7d757cbb5",
+    "action": "session_created",
+    "by": "Tester",
+    "details": {
+      "sessionId": "d290460b-60ef-4225-a690-4b1787609c57",
+      "targetName": "gg"
+    },
+    "timestamp": "2026-04-11T23:51:02.421Z"
+  },
+  {
+    "id": "7e95dd96-e548-41e3-8d83-654388054733",
+    "action": "session_deleted",
+    "by": "Administrator",
+    "details": {
+      "sessionId": "2beeb1c8-a681-4a5e-a5f4-2381821f33fa",
+      "targetName": "ralf1q",
+      "forUser": "admin"
+    },
+    "timestamp": "2026-04-11T23:50:22.408Z"
+  },
+  {
+    "id": "1826c667-4883-4f57-8c0b-d24ef41547a0",
+    "action": "session_created",
+    "by": "Tester",
+    "details": {
+      "sessionId": "48a1db59-12b8-4250-9ec8-dc5f15c9d8f6",
+      "targetName": "Ralf1q"
+    },
+    "timestamp": "2026-04-11T23:49:35.406Z"
+  },
+  {
+    "id": "9fafb758-7914-43b8-976e-ddcafd85dff6",
+    "action": "login",
+    "by": "Tester",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T23:49:05.506Z"
+  },
+  {
+    "id": "65bac4eb-66d8-4007-a52e-939c9acd2b34",
+    "action": "user_registered",
+    "by": "Tester",
+    "details": {
+      "inviteCode": "95C846D1"
+    },
+    "timestamp": "2026-04-11T23:49:05.333Z"
+  },
+  {
+    "id": "f38539ea-0407-42e2-a382-3c55286d12f2",
+    "action": "invite_created",
+    "by": "Administrator",
+    "details": {
+      "code": "95C846D1",
+      "maxUses": 1,
+      "expiresAt": null
+    },
+    "timestamp": "2026-04-11T23:48:29.511Z"
+  },
+  {
+    "id": "7648648a-58e8-4b50-9086-1d66be30217e",
+    "action": "broadcast",
+    "by": "Administrator",
+    "details": {
+      "message": "NGGA"
+    },
+    "timestamp": "2026-04-11T23:47:54.905Z"
+  },
+  {
+    "id": "0b941a2e-5b44-4c73-9dba-ce06949018eb",
+    "action": "banner_set",
+    "by": "Administrator",
+    "details": {
+      "text": "We're currently experiencing some issues with our API, please wait for an further notice.",
+      "severity": "critical"
+    },
+    "timestamp": "2026-04-11T23:47:39.805Z"
+  },
+  {
+    "id": "42aea477-bbd5-4504-bae6-8fca510f540b",
+    "action": "badges_updated",
+    "by": "Administrator",
+    "details": {
+      "target": "Moderator",
+      "badges": [
+        "verified"
+      ]
+    },
+    "timestamp": "2026-04-11T23:47:19.576Z"
+  },
+  {
+    "id": "3089ed1d-0149-4a07-8a7d-5210c2e72dae",
+    "action": "user_created",
+    "by": "Administrator",
+    "details": {
+      "target": "Moderator",
+      "role": "admin"
+    },
+    "timestamp": "2026-04-11T23:47:11.903Z"
+  },
+  {
+    "id": "866a6453-f394-48a6-89c9-4bd711e203e5",
+    "action": "user_deleted",
+    "by": "Administrator",
+    "details": {
+      "target": "admin"
+    },
+    "timestamp": "2026-04-11T23:46:09.243Z"
+  },
+  {
+    "id": "42452488-a58b-42a9-a42e-3692e3f42ac3",
+    "action": "login",
+    "by": "Administrator",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T23:46:02.067Z"
+  },
+  {
+    "id": "1b9137a1-e824-4e63-aeee-5ae395415bf8",
+    "action": "badges_updated",
+    "by": "admin",
+    "details": {
+      "target": "Administrator",
+      "badges": [
+        "verified",
+        "vip",
+        "trusted"
+      ]
+    },
+    "timestamp": "2026-04-11T23:45:49.571Z"
+  },
+  {
+    "id": "4161dca4-e2d9-45d5-a1d0-5dd93dd48dd2",
+    "action": "badges_updated",
+    "by": "admin",
+    "details": {
+      "target": "Administrator",
+      "badges": [
+        "verified",
+        "vip"
+      ]
+    },
+    "timestamp": "2026-04-11T23:45:46.759Z"
+  },
+  {
+    "id": "78191852-f854-4a46-b814-32b0f0d9c983",
+    "action": "badges_updated",
+    "by": "admin",
+    "details": {
+      "target": "Administrator",
+      "badges": [
+        "verified"
+      ]
+    },
+    "timestamp": "2026-04-11T23:45:44.855Z"
+  },
+  {
+    "id": "8ae33dc9-0594-41b0-951c-a1e2b82bc53b",
+    "action": "user_deleted",
+    "by": "admin",
+    "details": {
+      "target": "Moderator"
+    },
+    "timestamp": "2026-04-11T23:45:41.802Z"
+  },
+  {
+    "id": "209ca66a-8b2d-44ab-bb95-063d228c28e1",
+    "action": "user_created",
+    "by": "admin",
+    "details": {
+      "target": "Administrator",
+      "role": "admin"
+    },
+    "timestamp": "2026-04-11T23:45:37.999Z"
+  },
+  {
+    "id": "c518a039-fdda-4c4e-8e55-6b764129b3c8",
+    "action": "banner_set",
+    "by": "admin",
+    "details": {
+      "text": "We're currently experiencing some issues with our API, please wait for an further notice.",
+      "severity": "critical"
+    },
+    "timestamp": "2026-04-11T23:44:11.968Z"
+  },
+  {
+    "id": "e0019180-4d62-4df9-a305-00f3dc217c94",
+    "action": "broadcast",
+    "by": "admin",
+    "details": {
+      "message": "Hey"
+    },
+    "timestamp": "2026-04-11T23:43:41.964Z"
+  },
+  {
+    "id": "2a9afcb8-3250-403c-9bfb-e7b7b174f399",
+    "action": "login",
+    "by": "admin",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T23:43:33.672Z"
+  },
+  {
+    "id": "308569d2-97c1-4217-8640-ea80c894c007",
+    "action": "login_failed",
+    "by": "admin",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T23:42:57.492Z"
+  },
+  {
+    "id": "28a8be08-ad30-45a7-ac9f-4ded507f101b",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T20:53:36.425Z"
+  },
+  {
+    "id": "1ef95529-dbee-4159-9ff1-0dbc1a98e2ea",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T20:53:35.549Z"
+  },
+  {
+    "id": "3487641c-a348-4ba2-a5a5-e5f9971c0d69",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T20:53:31.178Z"
+  },
+  {
+    "id": "bfcd5d89-05ae-4003-bbe1-851f4e5e4eec",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T20:53:30.713Z"
+  },
+  {
+    "id": "8c384269-26e2-4cf4-82d4-06e30ef0089f",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T20:53:30.143Z"
+  },
+  {
+    "id": "841b97e0-6ea3-4e76-9206-11b1ef6624ce",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T20:53:29.032Z"
+  },
+  {
+    "id": "6ae614eb-e36c-4efb-9222-29b90d3af6db",
+    "action": "banner_cleared",
+    "by": "admin",
+    "details": {},
+    "timestamp": "2026-04-11T20:05:48.289Z"
+  },
+  {
+    "id": "20cb1fba-4d29-4e35-b559-9ce09a5a3d17",
+    "action": "session_created",
+    "by": "admin",
+    "details": {
+      "sessionId": "2beeb1c8-a681-4a5e-a5f4-2381821f33fa",
+      "targetName": "ralf1q"
+    },
+    "timestamp": "2026-04-11T20:05:00.573Z"
+  },
+  {
+    "id": "add6c02f-faf1-4e10-b84e-2ca317d29b78",
+    "action": "login",
+    "by": "admin",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T19:56:10.641Z"
+  },
+  {
+    "id": "e46d735c-b6d9-47a2-929c-a2251c739927",
+    "action": "invite_deleted",
+    "by": "admin",
+    "details": {
+      "code": "DF2D1BDE"
+    },
+    "timestamp": "2026-04-11T19:54:06.035Z"
+  },
+  {
+    "id": "b7d8ed4a-2602-437d-ab8d-27c21be8751f",
+    "action": "user_deleted",
+    "by": "admin",
+    "details": {
+      "target": "tester"
+    },
+    "timestamp": "2026-04-11T19:53:56.322Z"
+  },
+  {
+    "id": "e3ce20b4-8197-4053-90cb-92d5222ea74f",
+    "action": "user_deleted",
+    "by": "admin",
+    "details": {
+      "target": "BigD"
+    },
+    "timestamp": "2026-04-11T19:53:54.884Z"
+  },
+  {
+    "id": "b0c08ad2-70c8-4e2d-892f-6f45c7c71b39",
+    "action": "login",
+    "by": "admin",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T19:53:41.005Z"
+  },
+  {
+    "id": "28555738-92e2-4456-85e0-755c3d7e4b7a",
+    "action": "session_deleted",
+    "by": "admin",
+    "details": {
+      "sessionId": "dda3cb46-191b-416f-8346-9e0cce161b35",
+      "targetName": "ralf1q",
+      "forUser": "admin"
+    },
+    "timestamp": "2026-04-11T19:45:47.864Z"
+  },
+  {
+    "id": "68ec24e2-4150-42b5-abb6-dcf9ac8a5dde",
+    "action": "session_created",
+    "by": "admin",
+    "details": {
+      "sessionId": "dda3cb46-191b-416f-8346-9e0cce161b35",
+      "targetName": "ralf1q"
+    },
+    "timestamp": "2026-04-11T19:45:10.095Z"
+  },
+  {
+    "id": "fead8812-b670-4306-ac98-69d7008cd9a2",
+    "action": "invite_deleted",
+    "by": "admin",
+    "details": {
+      "code": "804708B1"
+    },
+    "timestamp": "2026-04-11T19:44:17.040Z"
+  },
+  {
+    "id": "6a62743b-dd46-4749-8c4a-59982f2376d2",
+    "action": "invite_created",
+    "by": "admin",
+    "details": {
+      "code": "804708B1"
+    },
+    "timestamp": "2026-04-11T19:44:06.446Z"
+  },
+  {
+    "id": "55e26b38-ce50-45d1-8224-0cf0507e8740",
+    "action": "broadcast",
+    "by": "admin",
+    "details": {
+      "message": "Sorry for the update, please relaunch the web!"
+    },
+    "timestamp": "2026-04-11T19:31:53.200Z"
+  },
+  {
+    "id": "262a687d-8036-4f18-905f-728f27f440c1",
+    "action": "broadcast",
+    "by": "admin",
+    "details": {
+      "message": "AGG"
+    },
+    "timestamp": "2026-04-11T19:31:33.015Z"
+  },
+  {
+    "id": "7e18891a-63d0-457f-9cef-1d0a77b32bd6",
+    "action": "broadcast",
+    "by": "admin",
+    "details": {
+      "message": "GG"
+    },
+    "timestamp": "2026-04-11T19:29:42.146Z"
+  },
+  {
+    "id": "42453a99-520e-4be1-8f0e-608cb2dd0b50",
+    "action": "session_deleted",
+    "by": "admin",
+    "details": {
+      "sessionId": "a52b7347-3002-4422-ad45-d5b6d6afa658",
+      "targetName": "ralfff",
+      "bulk": true
+    },
+    "timestamp": "2026-04-11T19:29:32.025Z"
+  },
+  {
+    "id": "739d0531-f43d-4286-b583-e4887a70e335",
+    "action": "banner_set",
+    "by": "admin",
+    "details": {
+      "text": "We are currently experiencing some issues with scan logs, please be patient for a further notice!",
+      "severity": "info"
+    },
+    "timestamp": "2026-04-11T19:29:00.530Z"
+  },
+  {
+    "id": "952c8920-8030-403f-b365-d459579a8bb4",
+    "action": "banner_set",
+    "by": "admin",
+    "details": {
+      "text": "We are currently experiencing some issues with scan logs, please be patient for a further notice!",
+      "severity": "critical"
+    },
+    "timestamp": "2026-04-11T19:28:55.592Z"
+  },
+  {
+    "id": "dc1534ff-8bb5-4a9a-88e6-59b7fce5343a",
+    "action": "banner_set",
+    "by": "admin",
+    "details": {
+      "text": "We are currently experiencing some issues with scan logs, please be patient for a further notice!",
+      "severity": "warning"
+    },
+    "timestamp": "2026-04-11T19:28:48.433Z"
+  },
+  {
+    "id": "39c47b88-7cd4-45d2-9efa-18c200e5b365",
+    "action": "banner_set",
+    "by": "admin",
+    "details": {
+      "text": "We are currently experiencing some issues with scan logs, please be patient for a further notice!",
+      "severity": "warning"
+    },
+    "timestamp": "2026-04-11T19:25:59.743Z"
+  },
+  {
+    "id": "f6476bd3-6d34-47b2-8a32-fbc436161d9d",
+    "action": "banner_set",
+    "by": "admin",
+    "details": {
+      "text": "We are currently experiencing some issues with scan logs, please be patient for a further notice!",
+      "severity": "critical"
+    },
+    "timestamp": "2026-04-11T19:25:50.403Z"
+  },
+  {
+    "id": "2617df5d-9550-481e-815a-8258bb7c91bd",
+    "action": "banner_set",
+    "by": "admin",
+    "details": {
+      "text": "We are currently experiencing some issues with scan logs, please be patient for a further notice!",
+      "severity": "critical"
+    },
+    "timestamp": "2026-04-11T19:18:03.211Z"
+  },
+  {
+    "id": "b2520a48-c02b-4053-add6-58c626955d8a",
+    "action": "login",
+    "by": "BigD",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T19:02:08.897Z"
+  },
+  {
+    "id": "b1f9caa1-e9eb-4fb9-bed6-7ea890014421",
+    "action": "user_unsuspended",
+    "by": "admin",
+    "details": {
+      "target": "BigD"
+    },
+    "timestamp": "2026-04-11T19:02:07.656Z"
+  },
+  {
+    "id": "71800701-2e91-4268-8b64-33ad65385f66",
+    "action": "user_suspended",
+    "by": "admin",
+    "details": {
+      "target": "BigD"
+    },
+    "timestamp": "2026-04-11T19:01:54.872Z"
+  },
+  {
+    "id": "423f8ced-515b-4dfa-bbf2-f3c80c1d22d3",
+    "action": "login",
+    "by": "BigD",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T19:01:43.573Z"
+  },
+  {
+    "id": "b34682d9-030f-4140-b87f-2fd2d4028146",
+    "action": "user_registered",
+    "by": "BigD",
+    "details": {
+      "inviteCode": "DF2D1BDE"
+    },
+    "timestamp": "2026-04-11T19:01:43.399Z"
+  },
+  {
+    "id": "f0090b66-227c-43ee-a88f-4122833bf8b8",
+    "action": "user_deleted",
+    "by": "admin",
+    "details": {
+      "target": "gg"
+    },
+    "timestamp": "2026-04-11T18:57:22.509Z"
+  },
+  {
+    "id": "2b28267a-05e8-4915-8ba9-7420ffd6d28e",
+    "action": "user_created",
+    "by": "admin",
+    "details": {
+      "target": "gg",
+      "role": "checker"
+    },
+    "timestamp": "2026-04-11T18:57:16.858Z"
+  },
+  {
+    "id": "bf6b7b9b-f18e-4186-adbc-0495ac779e49",
+    "action": "session_shared",
+    "by": "admin",
+    "details": {
+      "sessionId": "a52b7347-3002-4422-ad45-d5b6d6afa658",
+      "targetName": "ralfff"
+    },
+    "timestamp": "2026-04-11T18:56:25.713Z"
+  },
+  {
+    "id": "5f7296e8-7d7c-4935-8e5a-6fdae1c883f2",
+    "action": "session_created",
+    "by": "admin",
+    "details": {
+      "sessionId": "a52b7347-3002-4422-ad45-d5b6d6afa658",
+      "targetName": "ralfff"
+    },
+    "timestamp": "2026-04-11T18:55:51.451Z"
+  },
+  {
+    "id": "bf3d21a6-3ce6-4e54-bd31-5dd3c079431f",
+    "action": "login",
+    "by": "admin",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T18:55:15.803Z"
+  },
+  {
+    "id": "e46d7149-0ea0-4c04-bb2b-b5a6e505be03",
+    "action": "config_changed",
+    "by": "admin",
+    "details": {
+      "sessionTtlHours": 24,
+      "maxSessionsPerChecker": 0,
+      "jwtExpiryHours": 12,
+      "requireInviteCode": true
+    },
+    "timestamp": "2026-04-11T18:55:06.463Z"
+  },
+  {
+    "id": "db1cf679-cac3-4462-980c-499fbb737159",
+    "action": "invite_created",
+    "by": "admin",
+    "details": {
+      "code": "DF2D1BDE"
+    },
+    "timestamp": "2026-04-11T18:55:02.613Z"
+  },
+  {
+    "id": "c4b45105-1dcf-4b35-808b-c8672fa1e194",
+    "action": "login",
+    "by": "tester",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T18:47:06.666Z"
+  },
+  {
+    "id": "6da8df6e-c394-4476-bd3b-dd2790a53227",
+    "action": "login",
+    "by": "admin",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T18:43:34.471Z"
+  },
+  {
+    "id": "63b1ceac-14ef-4c99-96b4-3fd441b98f68",
+    "action": "login",
+    "by": "Moderator",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T18:43:12.907Z"
+  },
+  {
+    "id": "6136c514-2760-431c-8211-cbdd56fbe260",
+    "action": "login",
+    "by": "tester",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T18:42:56.678Z"
+  },
+  {
+    "id": "3eff71f1-fbbb-491b-b4b6-151fc64e3543",
+    "action": "banner_set",
+    "by": "admin",
+    "details": {
+      "text": "We are currently experiencing some issues with scan logs, please be patient for a further notice!"
+    },
+    "timestamp": "2026-04-11T18:42:39.346Z"
+  },
+  {
+    "id": "6942ed53-a50a-431b-b596-4872e52ba299",
+    "action": "login",
+    "by": "admin",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T18:41:12.573Z"
+  },
+  {
+    "id": "faef8209-180f-4cba-b97d-b01ac67cc215",
+    "action": "session_deleted",
+    "by": "admin",
+    "details": {
+      "sessionId": "20110846-539a-442e-8153-a6594e9f7b2d",
+      "targetName": "test",
+      "forUser": "admin"
+    },
+    "timestamp": "2026-04-11T18:39:54.370Z"
+  },
+  {
+    "id": "0825c9a7-2238-407c-9464-2a27513035f0",
+    "action": "session_deleted",
+    "by": "admin",
+    "details": {
+      "sessionId": "e01e46bd-b20f-4f23-846d-4838bb20b531",
+      "targetName": "gg",
+      "forUser": "tester"
+    },
+    "timestamp": "2026-04-11T18:39:53.196Z"
+  },
+  {
+    "id": "a8c428cb-99f3-4172-8ba0-92c4008fc26e",
+    "action": "session_deleted",
+    "by": "admin",
+    "details": {
+      "sessionId": "795a2c49-6a3e-4ec0-b7da-dd893007e031",
+      "targetName": "ggrant",
+      "forUser": "admin"
+    },
+    "timestamp": "2026-04-11T18:39:51.907Z"
+  },
+  {
+    "id": "bd33fc3f-3b83-4e37-ba1c-2ac8ae05659c",
+    "action": "session_deleted",
+    "by": "admin",
+    "details": {
+      "sessionId": "92a70a5d-bc6c-427c-8071-6f2de75f740d",
+      "targetName": "rent",
+      "forUser": "admin"
+    },
+    "timestamp": "2026-04-11T18:39:50.577Z"
+  },
+  {
+    "id": "44d1b3de-be3c-4a74-978b-e9e19a81e20e",
+    "action": "session_deleted",
+    "by": "admin",
+    "details": {
+      "sessionId": "4e77f337-7bb3-44b9-84e1-86e98ac0ee97",
+      "targetName": "ralf1q",
+      "forUser": "admin"
+    },
+    "timestamp": "2026-04-11T18:39:48.711Z"
+  },
+  {
+    "id": "8dfc718f-d350-42bf-8d2d-df0b4f462b53",
+    "action": "session_created",
+    "by": "admin",
+    "details": {
+      "sessionId": "4e77f337-7bb3-44b9-84e1-86e98ac0ee97",
+      "targetName": "ralf1q"
+    },
+    "timestamp": "2026-04-11T18:39:04.840Z"
+  },
+  {
+    "id": "f5f606f7-2fb7-443e-b432-d557d690d881",
+    "action": "blacklist_add",
+    "by": "admin",
+    "details": {
+      "playerName": "ralf1q",
+      "reason": "Cheating - VAC Banned"
+    },
+    "timestamp": "2026-04-11T18:38:54.862Z"
+  },
+  {
+    "id": "31c7d365-b910-4d03-ab89-e9174727fd10",
+    "action": "badges_updated",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "badges": [
+        "verified"
+      ]
+    },
+    "timestamp": "2026-04-11T18:14:08.541Z"
+  },
+  {
+    "id": "27c7cd7c-4f63-4723-85e3-29177f7f4058",
+    "action": "badges_updated",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "badges": []
+    },
+    "timestamp": "2026-04-11T18:14:07.488Z"
+  },
+  {
+    "id": "d3488397-426a-409c-80fa-68ec618e2173",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T18:11:47.536Z"
+  },
+  {
+    "id": "336dac21-fe13-44b1-9bd9-d8449e68a55d",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T18:11:46.924Z"
+  },
+  {
+    "id": "e4eb648f-0931-4eab-99a3-a1f7a866fa3c",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "tester",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T18:09:27.097Z"
+  },
+  {
+    "id": "a10ec2af-f51e-48fb-820e-d2f8f0160372",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "tester",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T18:09:26.684Z"
+  },
+  {
+    "id": "74a45dce-c8b5-41b5-b9aa-dceb6c49ba78",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T18:09:26.048Z"
+  },
+  {
+    "id": "774a08f8-8586-45ad-b2db-cbc96f647881",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T18:09:25.109Z"
+  },
+  {
+    "id": "9fcabaaf-28b5-425b-9557-c0a0a257c0e5",
+    "action": "session_created",
+    "by": "admin",
+    "details": {
+      "sessionId": "92a70a5d-bc6c-427c-8071-6f2de75f740d",
+      "targetName": "rent"
+    },
+    "timestamp": "2026-04-11T18:07:56.338Z"
+  },
+  {
+    "id": "7601cdb7-ada5-4043-8e3b-7809fd1ea618",
+    "action": "session_created",
+    "by": "admin",
+    "details": {
+      "sessionId": "795a2c49-6a3e-4ec0-b7da-dd893007e031",
+      "targetName": "ggrant"
+    },
+    "timestamp": "2026-04-11T18:03:45.682Z"
+  },
+  {
+    "id": "6075d727-caca-4907-9fe7-fb2f5f4c1cf2",
+    "action": "banner_set",
+    "by": "admin",
+    "details": {
+      "text": "GG"
+    },
+    "timestamp": "2026-04-11T18:00:51.159Z"
+  },
+  {
+    "id": "abf85679-6344-445e-8b63-1771b81f932d",
+    "action": "banner_cleared",
+    "by": "admin",
+    "details": {},
+    "timestamp": "2026-04-11T18:00:11.953Z"
+  },
+  {
+    "id": "b62d820d-8971-40f3-a4c3-9fe89e9ded75",
+    "action": "login",
+    "by": "admin",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T17:54:51.383Z"
+  },
+  {
+    "id": "3f04d767-59b2-4ac1-9975-24fec7fe22cb",
+    "action": "banner_set",
+    "by": "Moderator",
+    "details": {
+      "text": "Our systems currently experience some issues, please wait for an update!"
+    },
+    "timestamp": "2026-04-11T17:51:58.948Z"
+  },
+  {
+    "id": "057aa5eb-8f35-4e70-8200-a54ec1b7c4d1",
+    "action": "login",
+    "by": "Moderator",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T17:51:52.038Z"
+  },
+  {
+    "id": "a75fb785-4c28-4162-a07e-777d8b36f9c5",
+    "action": "login_failed",
+    "by": "moderator",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T17:51:50.660Z"
+  },
+  {
+    "id": "3edac64d-c748-4702-9b24-c9326fa55fdc",
+    "action": "login",
+    "by": "admin",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T17:51:19.856Z"
+  },
+  {
+    "id": "a205b747-7e92-4482-a859-1c770bdc2f8c",
+    "action": "session_created",
+    "by": "tester",
+    "details": {
+      "sessionId": "e01e46bd-b20f-4f23-846d-4838bb20b531",
+      "targetName": "gg"
+    },
+    "timestamp": "2026-04-11T17:50:41.829Z"
+  },
+  {
+    "id": "626d49d7-354a-4eac-9aec-27ff4a978ba9",
+    "action": "login",
+    "by": "tester",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T17:50:38.794Z"
+  },
+  {
+    "id": "739862ca-d18c-40f8-b60e-0d7931a4e6e0",
+    "action": "login",
+    "by": "tester",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T17:50:18.223Z"
+  },
+  {
+    "id": "d48855f8-1621-4d08-abfe-ae26fe4c7cde",
+    "action": "badges_updated",
+    "by": "admin",
+    "details": {
+      "target": "tester",
+      "badges": [
+        "verified"
+      ]
+    },
+    "timestamp": "2026-04-11T17:50:12.097Z"
+  },
+  {
+    "id": "b376af1f-fb8f-41fc-aeb4-761ef9e591b1",
+    "action": "user_created",
+    "by": "admin",
+    "details": {
+      "target": "tester",
+      "role": "checker"
+    },
+    "timestamp": "2026-04-11T17:50:05.932Z"
+  },
+  {
+    "id": "2770b3b3-9171-48b6-b13f-98ffa8462bbf",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T17:49:21.590Z"
+  },
+  {
+    "id": "0540eab8-c541-4ea9-a7d4-f6c960f715f7",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T17:49:21.019Z"
+  },
+  {
+    "id": "e543a1ea-24fc-4b89-8b14-a7195ba30f92",
+    "action": "badges_updated",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "badges": [
+        "verified"
+      ]
+    },
+    "timestamp": "2026-04-11T17:49:18.577Z"
+  },
+  {
+    "id": "2072a86d-ae34-4818-9777-5688e665dde3",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T17:49:15.293Z"
+  },
+  {
+    "id": "f3fda98c-523f-41f6-ae29-761dfcb48441",
+    "action": "user_created",
+    "by": "admin",
+    "details": {
+      "target": "Moderator",
+      "role": "checker"
+    },
+    "timestamp": "2026-04-11T17:49:13.746Z"
+  },
+  {
+    "id": "91a66111-4dfe-42ba-8eae-ca6e5b5df722",
+    "action": "session_created",
+    "by": "admin",
+    "details": {
+      "sessionId": "20110846-539a-442e-8153-a6594e9f7b2d",
+      "targetName": "test"
+    },
+    "timestamp": "2026-04-11T17:48:12.187Z"
+  },
+  {
+    "id": "d0008591-cd8a-4067-b7ce-1af444cc6f71",
+    "action": "broadcast",
+    "by": "admin",
+    "details": {
+      "message": "GG"
+    },
+    "timestamp": "2026-04-11T17:48:06.506Z"
+  },
+  {
+    "id": "b60cca68-5f66-48f5-bad2-2d09265fc67f",
+    "action": "banner_set",
+    "by": "admin",
+    "details": {
+      "text": "Our systems currently experience some issues, please wait for an update!"
+    },
+    "timestamp": "2026-04-11T17:47:35.198Z"
+  },
+  {
+    "id": "1c44fb3d-4e9d-46ee-bb49-ea01b1fc3645",
+    "action": "banner_set",
+    "by": "admin",
+    "details": {
+      "text": "TTT"
+    },
+    "timestamp": "2026-04-11T17:47:09.842Z"
+  },
+  {
+    "id": "ce9d4847-5bdf-4b62-9f2a-c754c60d1df1",
+    "action": "user_deleted",
+    "by": "admin",
+    "details": {
+      "target": "ralf1q"
+    },
+    "timestamp": "2026-04-11T17:46:00.683Z"
+  },
+  {
+    "id": "917d1324-5e11-449b-bbc3-8cf89eef3211",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "ralf1q",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T17:45:59.238Z"
+  },
+  {
+    "id": "6d956460-472c-4d39-89c6-ed8b74dc51a4",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "ralf1q",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T17:45:58.361Z"
+  },
+  {
+    "id": "0408fbd2-fb53-45e6-8d83-3b8f310e5daf",
+    "action": "login",
+    "by": "admin",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T17:45:50.938Z"
+  },
+  {
+    "id": "58b341ff-cb16-44f9-9c4f-f97267ebb5da",
+    "action": "badges_updated",
+    "by": "ralf1q",
+    "details": {
+      "target": "admin",
+      "badges": [
+        "trusted"
+      ]
+    },
+    "timestamp": "2026-04-11T17:45:14.703Z"
+  },
+  {
+    "id": "528ea6bf-628c-4c4f-a00d-54b65d435dfa",
+    "action": "user_deleted",
+    "by": "ralf1q",
+    "details": {
+      "target": "Test"
+    },
+    "timestamp": "2026-04-11T17:39:00.252Z"
+  },
+  {
+    "id": "4e9c8915-be3e-476b-9916-d3630935ee49",
+    "action": "role_changed",
+    "by": "ralf1q",
+    "details": {
+      "target": "Test",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T17:38:58.085Z"
+  },
+  {
+    "id": "37562d31-66b0-4998-bf63-b9e317aeb22f",
+    "action": "role_changed",
+    "by": "ralf1q",
+    "details": {
+      "target": "Test",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T17:38:57.183Z"
+  },
+  {
+    "id": "8ad1223e-0164-4ecf-aba2-4e2a4c4ca08e",
+    "action": "role_changed",
+    "by": "ralf1q",
+    "details": {
+      "target": "Test",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T17:38:56.751Z"
+  },
+  {
+    "id": "fce5f026-dd8e-459c-acd3-e946113f7939",
+    "action": "role_changed",
+    "by": "ralf1q",
+    "details": {
+      "target": "Test",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T17:38:56.532Z"
+  },
+  {
+    "id": "e5b0f372-a620-4cc6-837b-5f54a14db37e",
+    "action": "role_changed",
+    "by": "ralf1q",
+    "details": {
+      "target": "Test",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T17:38:56.285Z"
+  },
+  {
+    "id": "a165fe60-debd-460c-9e82-f17cc57ebbe1",
+    "action": "role_changed",
+    "by": "ralf1q",
+    "details": {
+      "target": "Test",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T17:38:56.107Z"
+  },
+  {
+    "id": "ef182ac4-ae50-4da3-993d-b0f23bb0c225",
+    "action": "role_changed",
+    "by": "ralf1q",
+    "details": {
+      "target": "Test",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T17:38:55.945Z"
+  },
+  {
+    "id": "ae40d4c4-144c-422e-8fb0-b281989ddeee",
+    "action": "role_changed",
+    "by": "ralf1q",
+    "details": {
+      "target": "Test",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T17:38:55.787Z"
+  },
+  {
+    "id": "e9e39c79-5979-484e-94de-d329f2e29dea",
+    "action": "role_changed",
+    "by": "ralf1q",
+    "details": {
+      "target": "Test",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T17:38:55.624Z"
+  },
+  {
+    "id": "d986ef23-a486-42aa-a149-721caea4e318",
+    "action": "role_changed",
+    "by": "ralf1q",
+    "details": {
+      "target": "Test",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T17:38:55.439Z"
+  },
+  {
+    "id": "28599524-dc5c-4fc5-a79e-b33cda68cd1f",
+    "action": "role_changed",
+    "by": "ralf1q",
+    "details": {
+      "target": "Test",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T17:38:55.193Z"
+  },
+  {
+    "id": "fd970277-503d-45c6-88e1-d277acc026ee",
+    "action": "role_changed",
+    "by": "ralf1q",
+    "details": {
+      "target": "Test",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T17:38:54.790Z"
+  },
+  {
+    "id": "c5bc8d73-d4e0-4143-b03e-d70bfbef5a63",
+    "action": "user_created",
+    "by": "ralf1q",
+    "details": {
+      "target": "Test",
+      "role": "admin"
+    },
+    "timestamp": "2026-04-11T17:38:53.597Z"
+  },
+  {
+    "id": "455e085c-3d1b-429b-b661-fb6852efb592",
+    "action": "session_deleted",
+    "by": "ralf1q",
+    "details": {
+      "sessionId": "455a2bc2-9894-4364-ba7b-aef41165dc6d",
+      "targetName": "ralf1q",
+      "forUser": "test"
+    },
+    "timestamp": "2026-04-11T17:35:50.506Z"
+  },
+  {
+    "id": "f935c621-d125-4a1a-b89f-1f68c126f24b",
+    "action": "user_deleted",
+    "by": "ralf1q",
+    "details": {
+      "target": "admin"
+    },
+    "timestamp": "2026-04-11T17:32:51.453Z"
+  },
+  {
+    "id": "4219ea91-ec58-4885-acbb-d920c1af1a07",
+    "action": "login",
+    "by": "ralf1q",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T17:32:45.835Z"
+  },
+  {
+    "id": "58a39986-072c-4fa4-bfb9-e9b6b2094ef3",
+    "action": "user_created",
+    "by": "admin",
+    "details": {
+      "target": "ralf1q",
+      "role": "admin"
+    },
+    "timestamp": "2026-04-11T17:32:30.793Z"
+  },
+  {
+    "id": "f0f9e566-bec6-4c7b-8894-778f5a06b63d",
+    "action": "user_deleted",
+    "by": "admin",
+    "details": {
+      "target": "test"
+    },
+    "timestamp": "2026-04-11T17:32:20.873Z"
+  },
+  {
+    "id": "dc1b9f88-07cd-4544-9ddd-d063ce570a4d",
+    "action": "csv_export",
+    "by": "admin",
+    "details": {
+      "count": 1
+    },
+    "timestamp": "2026-04-11T17:21:10.151Z"
+  },
+  {
+    "id": "b864c221-22c3-4804-8229-3da3abc4620d",
+    "action": "login",
+    "by": "admin",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T17:20:45.415Z"
+  },
+  {
+    "id": "e9157289-2fda-4a9d-a73e-040e18a5e9dc",
+    "action": "login_failed",
+    "by": "admin",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T17:20:42.000Z"
+  },
+  {
+    "id": "708ec871-106e-496e-b42a-37a1f47fcac0",
+    "action": "session_created",
+    "by": "test",
+    "details": {
+      "sessionId": "455a2bc2-9894-4364-ba7b-aef41165dc6d",
+      "targetName": "ralf1q"
+    },
+    "timestamp": "2026-04-11T17:20:14.266Z"
+  },
+  {
+    "id": "edc8e53e-e293-4038-8fbe-cf29a564186e",
+    "action": "login",
+    "by": "test",
+    "details": {
+      "ip": "::1"
+    },
+    "timestamp": "2026-04-11T17:20:02.001Z"
+  },
+  {
+    "id": "3fb59b55-4297-4348-8260-ff0284b134a1",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "test",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T17:17:27.518Z"
+  },
+  {
+    "id": "01d33071-a9d8-47cc-8534-779865a09829",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "test",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T17:17:23.600Z"
+  },
+  {
+    "id": "8e39d3ca-e707-414d-b59a-19743de66db9",
+    "action": "user_created",
+    "by": "admin",
+    "details": {
+      "target": "test",
+      "role": "checker"
+    },
+    "timestamp": "2026-04-11T17:16:25.519Z"
+  },
+  {
+    "id": "d817801d-88fa-443b-95fa-696293a23891",
+    "action": "user_deleted",
+    "by": "admin",
+    "details": {
+      "target": "ralf1q"
+    },
+    "timestamp": "2026-04-11T17:15:42.130Z"
+  },
+  {
+    "id": "b879df83-ed08-4a2f-9aff-5e4bb8cc30ea",
+    "action": "user_unsuspended",
+    "by": "admin",
+    "details": {
+      "target": "ralf1q"
+    },
+    "timestamp": "2026-04-11T17:15:37.295Z"
+  },
+  {
+    "id": "ffd74996-7939-4421-99ec-8a49f81f5d66",
+    "action": "user_suspended",
+    "by": "admin",
+    "details": {
+      "target": "ralf1q"
+    },
+    "timestamp": "2026-04-11T17:15:34.341Z"
+  },
+  {
+    "id": "66dc92b9-2a00-4da8-b212-683358db7499",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "ralf1q",
+      "from": "admin",
+      "to": "checker"
+    },
+    "timestamp": "2026-04-11T17:15:32.480Z"
+  },
+  {
+    "id": "333905c7-188c-4c43-9c11-b0c13b19d39f",
+    "action": "role_changed",
+    "by": "admin",
+    "details": {
+      "target": "ralf1q",
+      "from": "checker",
+      "to": "admin"
+    },
+    "timestamp": "2026-04-11T17:15:26.977Z"
+  },
+  {
+    "id": "2394e960-f577-4d5d-95e9-bbc2356d9fa3",
+    "action": "config_changed",
+    "by": "admin",
+    "details": {
+      "sessionTtlHours": 24,
+      "maxSessionsPerChecker": 0,
+      "jwtExpiryHours": 12
+    },
+    "timestamp": "2026-04-11T17:15:18.546Z"
+  },
+  {
+    "id": "0619d653-4190-4fd3-aab1-718af453b6dd",
+    "action": "broadcast",
+    "by": "admin",
+    "details": {
+      "message": "AFGAGAGAG"
+    },
+    "timestamp": "2026-04-11T17:15:11.067Z"
+  },
+  {
+    "id": "ba905b16-f6c6-45e7-8249-9b38c74bc2b0",
+    "action": "broadcast",
+    "by": "admin",
+    "details": {
+      "message": "Test"
+    },
+    "timestamp": "2026-04-11T17:15:03.802Z"
+  }
+]

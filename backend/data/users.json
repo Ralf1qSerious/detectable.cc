@@ -1,0 +1,30 @@
+{
+  "administrator": {
+    "username": "Administrator",
+    "passwordHash": "$2a$12$UKTfBYMwoqMJ8aAPlHiTcO0ayQn0taWWh6KreZpXpXP/b2ZkiYgUG",
+    "role": "admin",
+    "createdAt": "2026-04-11T23:45:37.998Z",
+    "badges": [
+      "verified",
+      "vip",
+      "trusted"
+    ],
+    "lastLoginAt": "2026-04-11T23:46:02.067Z"
+  },
+  "moderator": {
+    "username": "Moderator",
+    "passwordHash": "$2a$12$5InY9OhRXQ8oBQe/0jubtugjRc/5Rw5kq3URsPMEAOmXyUHnG6XvO",
+    "role": "admin",
+    "createdAt": "2026-04-11T23:47:11.902Z",
+    "badges": [
+      "verified"
+    ]
+  },
+  "tester": {
+    "username": "Tester",
+    "passwordHash": "$2a$12$GWxyqqlvagFXMzNq33gyuOGZ8UxbJyyzkFMdkNwuh3uxOvVHUd4C2",
+    "role": "checker",
+    "createdAt": "2026-04-11T23:49:05.332Z",
+    "lastLoginAt": "2026-04-11T23:49:05.506Z"
+  }
+}

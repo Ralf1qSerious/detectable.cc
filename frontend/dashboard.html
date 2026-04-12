@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>detectable.cc — Dashboard</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body class="app-body">
+<script>
+  (function(){const t=localStorage.getItem('dlv_theme');if(t)document.documentElement.setAttribute('data-theme',t);})();
+</script>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-dot brand-dot-sm"></span>
+      <span class="sidebar-brand-name">detectable<span class="brand-tld">.lv</span></span>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a href="/dashboard.html" class="sidebar-link active">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Sessions
+      </a>
+      <a href="/profiles.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Profiles
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-username" id="sidebarUsername">—</div>
+          <div class="sidebar-role" id="sidebarRoleLabel">Checker</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm sidebar-logout" onclick="logout()" title="Sign out">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main area ── -->
+  <div class="app-main">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="topbar-title">Sessions</h1>
+        <span class="topbar-sub">Create and manage PC check sessions</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-clock" id="topbarClock">--:--:--</div>
+        <div class="live-dot" id="liveDot" title="Live"></div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+        <a id="dlClientBtn" class="btn btn-ghost btn-sm" href="#" download="DetectableCC.exe" title="Download scanner client">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Scanner
+        </a>
+        <button class="btn btn-primary" onclick="openNewSessionModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Session
+        </button>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- Announcement banner -->
+      <div id="announcementBanner" style="display:none"></div>
+
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-card stat-total">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div>
+            <div class="stat-value" id="statTotal">0</div>
+            <div class="stat-label">Total Sessions</div>
+          </div>
+        </div>
+        <div class="stat-card stat-waiting">
+          <div class="stat-icon stat-icon-yellow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <div class="stat-value text-yellow" id="statWaiting">0</div>
+            <div class="stat-label">Waiting</div>
+          </div>
+        </div>
+        <div class="stat-card stat-scanning">
+          <div class="stat-icon stat-icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          </div>
+          <div>
+            <div class="stat-value text-blue" id="statScanning">0</div>
+            <div class="stat-label">Scanning</div>
+          </div>
+        </div>
+        <div class="stat-card stat-completed">
+          <div class="stat-icon stat-icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <div class="stat-value text-green" id="statCompleted">0</div>
+            <div class="stat-label">Completed</div>
+          </div>
+        </div>
+      </div><!-- stats-row -->
+
+      <!-- Admin overview bar (injected by JS for admin role) -->
+      <div id="adminStatsBar" class="admin-stats-bar hidden"></div>
+
+      <!-- Search + filter bar -->
+      <div class="action-bar">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search by name or token…" oninput="filterSessions()" />
+        </div>
+        <div class="filter-pills">
+          <button class="filter-pill active" data-filter="all"       onclick="setFilter(this)">All</button>
+          <button class="filter-pill"        data-filter="waiting"   onclick="setFilter(this)">Waiting</button>
+          <button class="filter-pill"        data-filter="scanning"  onclick="setFilter(this)">Scanning</button>
+          <button class="filter-pill"        data-filter="completed" onclick="setFilter(this)">Completed</button>
+        </div>
+      </div>
+
+      <!-- Sessions list -->
+      <div id="sessionsList" class="sessions-grid">
+        <!-- Skeleton cards shown before first load -->
+        <div class="session-card skeleton-card" id="skelCard1" style="pointer-events:none">
+          <div><div class="skeleton skel-text" style="width:160px;height:16px;margin-bottom:8px"></div>
+          <div class="skeleton skel-text" style="width:220px;height:12px"></div></div>
+          <div class="session-card-right"><div class="skeleton skel-text" style="width:70px;height:22px;border-radius:20px"></div></div>
+        </div>
+        <div class="session-card skeleton-card" id="skelCard2" style="pointer-events:none">
+          <div><div class="skeleton skel-text" style="width:130px;height:16px;margin-bottom:8px"></div>
+          <div class="skeleton skel-text" style="width:180px;height:12px"></div></div>
+          <div class="session-card-right"><div class="skeleton skel-text" style="width:70px;height:22px;border-radius:20px"></div></div>
+        </div>
+        <div class="session-card skeleton-card" id="skelCard3" style="pointer-events:none">
+          <div><div class="skeleton skel-text" style="width:200px;height:16px;margin-bottom:8px"></div>
+          <div class="skeleton skel-text" style="width:140px;height:12px"></div></div>
+          <div class="session-card-right"><div class="skeleton skel-text" style="width:70px;height:22px;border-radius:20px"></div></div>
+        </div>
+      </div>
+      <div id="noSessions" class="empty-state hidden">
+        <div class="empty-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <p class="empty-title">No sessions yet</p>
+        <p class="empty-sub">Click <strong>New Session</strong> to start your first PC check.</p>
+      </div>
+
+      <!-- Bulk action bar (appears when sessions are selected) -->
+      <div class="bulk-bar hidden" id="bulkBar">
+        <span id="bulkCount">0 selected</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="selectAllSessions()">Select All</button>
+          <button class="btn btn-danger btn-sm" onclick="bulkDelete()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            Delete Selected
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="clearSelection()">Cancel</button>
+        </div>
+      </div>
+
+    </div><!-- app-content -->
+  </div><!-- app-main -->
+
+  <!-- ── Modals ── -->
+  <!-- New Session Modal -->
+  <div class="modal-overlay hidden" id="newSessionModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>New Session</h2>
+        <button class="modal-close" onclick="closeNewSessionModal()">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Player Name / Discord</label>
+          <input type="text" id="targetName" placeholder="e.g. Player#1234" />
+        </div>
+        <div class="form-group" id="templatePickerGroup" style="display:none">
+          <label>Quick Description <span class="optional">(optional)</span></label>
+          <select id="templatePicker" class="form-select" onchange="applyTemplate(this.value)">
+            <option value="">— select a template —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Notes <span class="optional">(optional)</span></label>
+          <textarea id="sessionNotes" placeholder="Reason for check, server, date…" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeNewSessionModal()">Cancel</button>
+        <button class="btn btn-primary" id="createBtn" onclick="createSession()">Create Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session Created Modal -->
+  <div class="modal-overlay hidden" id="createdModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Session Created &#10003;</h2>
+        <button class="modal-close" onclick="closeCreatedModal()">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-12">Send the token below to the player. They run <strong>DetectableLV.exe</strong> and enter it.</p>
+        <div class="form-group">
+          <label>Session Token</label>
+          <div class="copy-row">
+            <input type="text" id="createdSessionId" readonly />
+            <button class="btn btn-secondary" onclick="copyToken()">Copy</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Player Instructions</label>
+          <div class="code-block" id="playerInstructions"></div>
+        </div>
+        <div class="notice notice-info">
+          Results appear on your dashboard in real-time as soon as the scan finishes.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeCreatedModal()">Close</button>
+        <button class="btn btn-primary" onclick="openSession()">Watch Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Checker Modal -->
+  <div class="modal-overlay hidden" id="registerModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Add Checker Account</h2>
+        <button class="modal-close" onclick="closeRegisterModal()">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="regUsername" placeholder="username" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="regPassword" placeholder="••••••••" />
+        </div>
+        <div id="regError" class="error-msg hidden"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeRegisterModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="registerChecker()">Create Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Broadcast Modal -->
+  <div class="modal-overlay hidden" id="broadcastModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Broadcast Announcement</h2>
+        <button class="modal-close" onclick="closeBroadcastModal()">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--text-muted);font-size:13px;margin-bottom:14px">Sends a live notification to all connected checkers immediately.</p>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea id="broadcastMsg" rows="3" placeholder="e.g. Server maintenance in 10 minutes…"></textarea>
+        </div>
+        <div id="broadcastError" class="error-msg hidden"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeBroadcastModal()">Cancel</button>
+        <button class="btn btn-primary" id="broadcastBtn" onclick="sendBroadcast()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          Send Broadcast
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/assets/notify.js"></script>
+  <script src="/assets/dashboard.js"></script>
+</body>
+</html>

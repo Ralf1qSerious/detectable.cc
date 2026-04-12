@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>detectable.cc — PC Checker Platform</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body class="split-page">
+
+  <!-- ── Left branding panel ── -->
+  <div class="split-left">
+    <div class="split-left-content">
+      <div class="brand brand-xl">
+        <span class="brand-dot brand-dot-xl"></span>
+        <span class="brand-name brand-name-xl">detectable<span class="brand-tld">.lv</span></span>
+      </div>
+      <h1 class="hero-title">PC Checker Platform</h1>
+      <p class="hero-sub">Real-time scan sessions, live results, and smart risk scoring — built for serious esports integrity.</p>
+
+      <ul class="feature-list">
+        <li class="feature-item">
+          <span class="feature-check">&#10003;</span>
+          <div>
+            <div class="feature-name">Deep System Scan</div>
+            <div class="feature-desc">Processes, modules, services, registry, network &amp; files</div>
+          </div>
+        </li>
+        <li class="feature-item">
+          <span class="feature-check">&#10003;</span>
+          <div>
+            <div class="feature-name">Live Results</div>
+            <div class="feature-desc">Results stream to your dashboard in real-time over WebSocket</div>
+          </div>
+        </li>
+        <li class="feature-item">
+          <span class="feature-check">&#10003;</span>
+          <div>
+            <div class="feature-name">Smart Risk Score</div>
+            <div class="feature-desc">Automated severity-weighted risk scoring from 0 to 100</div>
+          </div>
+        </li>
+        <li class="feature-item">
+          <span class="feature-check">&#10003;</span>
+          <div>
+            <div class="feature-name">Explicit Consent</div>
+            <div class="feature-desc">Player must accept what is collected before any scan runs</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="split-left-foot">
+      detectable.cc v2 &mdash; Esports Integrity Platform
+    </div>
+  </div>
+
+  <!-- ── Right login panel ── -->
+  <div class="split-right">
+    <div class="auth-card">
+      <div class="brand" style="margin-bottom:6px">
+        <span class="brand-dot"></span>
+        <span class="brand-name">detectable<span class="brand-tld">.lv</span></span>
+      </div>
+
+      <!-- Tab switcher -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+
+      <!-- Sign In form -->
+      <div id="panelLogin">
+        <form id="loginForm" autocomplete="off">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="username" required autofocus />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="••••••••" required />
+          </div>
+          <div id="loginError" class="error-msg hidden"></div>
+          <button type="submit" class="btn btn-primary btn-full" id="loginBtn">
+            Sign In
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Sign Up form -->
+      <div id="panelSignup" style="display:none">
+        <form id="signupForm" autocomplete="off">
+          <div class="form-group">
+            <label>Invite Code</label>
+            <input type="text" id="inviteCode" placeholder="e.g. A3F9K1Z2" required
+              style="text-transform:uppercase;letter-spacing:.12em;font-family:monospace;font-size:.95rem" />
+            <div style="font-size:.74rem;color:var(--text-muted);margin-top:.3rem">Obtain an invite code from an admin</div>
+          </div>
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="regUsername" placeholder="choose a username" required />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="regPassword" placeholder="••••••••" required />
+          </div>
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" id="regConfirm" placeholder="••••••••" required />
+          </div>
+          <div id="signupError" class="error-msg hidden"></div>
+          <div id="signupSuccess" class="hidden" style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);color:#22c55e;border-radius:8px;padding:.6rem .85rem;font-size:.84rem;margin-bottom:.75rem"></div>
+          <button type="submit" class="btn btn-primary btn-full" id="signupBtn">
+            Create Account
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </form>
+      </div>
+
+      <div class="access-cta">
+        <span class="access-cta-label">Want access?</span>
+        <a class="access-cta-link" href="https://discord.gg/Y4eaTsHGRW" target="_blank" rel="noopener noreferrer">Join our Discord</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    if (localStorage.getItem('dlv_token')) {
+      window.location.href = '/dashboard.html';
+    }
+
+    const ARROW_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+
+    function switchTab(tab) {
+      const isLogin = tab === 'login';
+      document.getElementById('tabLogin').classList.toggle('active', isLogin);
+      document.getElementById('tabSignup').classList.toggle('active', !isLogin);
+      document.getElementById('panelLogin').style.display  = isLogin ? '' : 'none';
+      document.getElementById('panelSignup').style.display = isLogin ? 'none' : '';
+      document.getElementById('loginError').classList.add('hidden');
+      document.getElementById('signupError').classList.add('hidden');
+      if (isLogin) document.getElementById('username').focus();
+      else document.getElementById('inviteCode').focus();
+    }
+
+    // ─── Sign In ──────────────────────────────────────────────────────────────
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      const err = document.getElementById('loginError');
+      btn.disabled = true;
+      btn.innerHTML = 'Signing in&hellip;';
+      err.classList.add('hidden');
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: document.getElementById('username').value.trim(),
+            password: document.getElementById('password').value
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Login failed');
+        localStorage.setItem('dlv_token', data.token);
+        localStorage.setItem('dlv_user', data.username);
+        localStorage.setItem('dlv_role', data.role || 'checker');
+        window.location.href = '/dashboard.html';
+      } catch (ex) {
+        err.textContent = ex.message;
+        err.classList.remove('hidden');
+        btn.disabled = false;
+        btn.innerHTML = 'Sign In ' + ARROW_SVG;
+      }
+    });
+
+    // ─── Sign Up ──────────────────────────────────────────────────────────────
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn     = document.getElementById('signupBtn');
+      const err     = document.getElementById('signupError');
+      const success = document.getElementById('signupSuccess');
+      const invite  = document.getElementById('inviteCode').value.trim().toUpperCase();
+      const uname   = document.getElementById('regUsername').value.trim();
+      const pass    = document.getElementById('regPassword').value;
+      const confirm = document.getElementById('regConfirm').value;
+
+      err.classList.add('hidden');
+      success.classList.add('hidden');
+
+      if (pass !== confirm) {
+        err.textContent = 'Passwords do not match';
+        err.classList.remove('hidden');
+        return;
+      }
+      if (pass.length < 6) {
+        err.textContent = 'Password must be at least 6 characters';
+        err.classList.remove('hidden');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = 'Creating account&hellip;';
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: uname, password: pass, inviteCode: invite })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Signup failed');
+
+        // Auto-login after successful registration
+        const loginRes = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: uname, password: pass })
+        });
+        const loginData = await loginRes.json();
+        if (!loginRes.ok) {
+          // Account created but auto-login failed — switch to login tab
+          success.textContent = 'Account created! Sign in below.';
+          success.classList.remove('hidden');
+          btn.disabled = false;
+          btn.innerHTML = 'Create Account ' + ARROW_SVG;
+          setTimeout(() => switchTab('login'), 1500);
+          return;
+        }
+        localStorage.setItem('dlv_token', loginData.token);
+        localStorage.setItem('dlv_user', loginData.username);
+        localStorage.setItem('dlv_role', loginData.role || 'checker');
+        window.location.href = '/dashboard.html';
+      } catch (ex) {
+        err.textContent = ex.message;
+        err.classList.remove('hidden');
+        btn.disabled = false;
+        btn.innerHTML = 'Create Account ' + ARROW_SVG;
+      }
+    });
+  </script>
+</body>
+</html>

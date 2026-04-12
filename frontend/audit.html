@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>detectable.cc — Audit Log</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+  <style>
+    /* ── Audit-specific ────────────────────────────────────── */
+    .audit-toolbar {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .audit-search-wrap { position: relative; flex: 1; min-width: 180px; max-width: 280px; }
+    .audit-search-wrap svg {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      width: 14px; height: 14px; stroke: var(--text-muted); pointer-events: none;
+    }
+    .audit-search {
+      width: 100%; padding: 8px 12px 8px 32px;
+      background: var(--bg3); border: 1px solid var(--border2);
+      border-radius: var(--radius); color: var(--text); font-size: 13px;
+      font-family: inherit; outline: none; transition: border-color .15s;
+    }
+    .audit-search:focus { border-color: var(--accent); }
+    .audit-select {
+      padding: 8px 12px; background: var(--bg3); border: 1px solid var(--border2);
+      border-radius: var(--radius); color: var(--text); font-size: 13px;
+      font-family: inherit; outline: none; cursor: pointer;
+    }
+    .audit-select:focus { border-color: var(--accent); }
+    .audit-count {
+      margin-left: auto; font-size: 12px; color: var(--text-muted);
+      white-space: nowrap; padding: 6px 10px;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .audit-count span { color: var(--text); font-weight: 700; }
+
+    /* Table */
+    .audit-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .audit-tbl { width: 100%; border-collapse: collapse; }
+    .audit-tbl thead tr { background: var(--bg3); border-bottom: 1px solid var(--border2); }
+    .audit-tbl th {
+      padding: 11px 16px; text-align: left;
+      font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--text-muted);
+    }
+    .audit-tbl td { padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .audit-tbl tbody tr:last-child td { border-bottom: none; }
+    .audit-tbl tbody tr { transition: background .1s; }
+    .audit-tbl tbody tr:hover { background: var(--bg3); }
+
+    /* Severity row tints */
+    .arow-danger  td:first-child { border-left: 2px solid var(--red); }
+    .arow-warning td:first-child { border-left: 2px solid var(--yellow); }
+    .arow-info    td:first-child { border-left: 2px solid var(--blue); }
+    .arow-success td:first-child { border-left: 2px solid var(--green); }
+    .arow-purple  td:first-child { border-left: 2px solid var(--purple); }
+    .arow-muted   td:first-child { border-left: 2px solid var(--border2); }
+
+    /* Chips */
+    .a-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 2px 9px; border-radius: 4px; font-size: 11px; font-weight: 700;
+      white-space: nowrap;
+    }
+    .a-chip svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+    /* Details pills */
+    .a-detail { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .a-kv {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--bg4); border: 1px solid var(--border); border-radius: 4px;
+      padding: 2px 8px; font-size: 11.5px;
+    }
+    .a-kv-key { color: var(--text-muted); }
+    .a-kv-val { color: var(--text); font-weight: 500; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Actor */
+    .a-actor { display: flex; align-items: center; gap: 7px; }
+    .a-avatar {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: rgba(91,110,245,.15); color: var(--accent);
+      border: 1px solid rgba(91,110,245,.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800; flex-shrink: 0; text-transform: uppercase;
+    }
+    .a-avatar-system {
+      background: var(--bg4); color: var(--text-dim); border-color: var(--border2);
+    }
+    .a-actor-name { font-size: 12.5px; font-weight: 600; }
+
+    /* Timestamp */
+    .a-ts { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted); white-space: nowrap; }
+    .a-ts-rel { font-size: 10.5px; color: var(--text-dim); margin-top: 2px; }
+
+    /* Empty / loading */
+    .audit-empty { text-align: center; padding: 64px 20px; color: var(--text-muted); }
+    .audit-empty svg { width: 40px; height: 40px; stroke: var(--text-dim); margin-bottom: 12px; }
+    .audit-empty-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+
+    /* Load more */
+    .load-more-row td { padding: 14px; text-align: center; border-top: 1px solid var(--border2); }
+
+    /* Stats bar */
+    .audit-stats { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .as-tile {
+      flex: 1; min-width: 100px; padding: 12px 16px;
+      background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+      text-align: center;
+    }
+    .as-val { font-size: 22px; font-weight: 800; line-height: 1; }
+    .as-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; margin-top: 4px; }
+  </style>
+</head>
+<body class="app-body">
+<script>
+  (function(){const t=localStorage.getItem('dlv_theme');if(t)document.documentElement.setAttribute('data-theme',t);})();
+</script>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-dot brand-dot-sm"></span>
+      <span class="sidebar-brand-name">detectable<span class="brand-tld">.lv</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/dashboard.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Sessions
+      </a>
+      <a href="/profiles.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Profiles
+      </a>
+      <div class="sidebar-section-label">Admin</div>
+      <a href="/users.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Users
+      </a>
+      <a href="/audit.html" class="sidebar-link active">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Audit Log
+      </a>
+      <a href="/settings.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-username" id="sidebarUsername">—</div>
+          <div class="sidebar-role" id="sidebarRoleLabel">Administrator</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm sidebar-logout" onclick="logout()" title="Sign out">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="topbar-title">Audit Log</h1>
+        <span class="topbar-sub">All admin actions and system events</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-clock" id="topbarClock">--:--:--</div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+        <button class="btn btn-ghost btn-sm" id="autoRefreshBtn" onclick="toggleAutoRefresh()" title="Auto-refresh every 30s">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Auto-refresh
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="loadAudit(true)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+          Refresh
+        </button>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- Stats tiles -->
+      <div class="audit-stats" id="auditStats"></div>
+
+      <!-- Activity heatmap -->
+      <div class="heat-section">
+        <div class="heat-header">
+          <div class="heat-title">Activity — Last 14 Weeks</div>
+          <div class="heat-subtitle" id="heatSubtitle">Loading…</div>
+        </div>
+        <div class="heat-grid-wrap">
+          <div class="heat-grid" id="heatGrid"></div>
+        </div>
+        <div class="heat-legend">
+          Less
+          <div class="heat-cell heat-0"></div>
+          <div class="heat-cell heat-1"></div>
+          <div class="heat-cell heat-2"></div>
+          <div class="heat-cell heat-3"></div>
+          <div class="heat-cell heat-4"></div>
+          More
+        </div>
+      </div>
+
+      <!-- Toolbar: search + filters -->
+      <div class="audit-toolbar">
+        <div class="audit-search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="auditSearch" class="audit-search" type="text" placeholder="Search user or action…" oninput="applyFilters()" />
+        </div>
+
+        <select id="auditActionFilter" class="audit-select" onchange="applyFilters()">
+          <option value="">All actions</option>
+          <option value="login">Login</option>
+          <option value="login_failed">Login Failed</option>
+          <option value="user_created">User Created</option>
+          <option value="user_deleted">User Deleted</option>
+          <option value="user_suspended">User Suspended</option>
+          <option value="user_unsuspended">User Unsuspended</option>
+          <option value="role_changed">Role Changed</option>
+          <option value="password_reset">Password Reset</option>
+          <option value="session_created">Session Created</option>
+          <option value="session_deleted">Session Deleted</option>
+          <option value="csv_export">CSV Export</option>
+          <option value="broadcast">Broadcast</option>
+          <option value="blacklist_add">Blacklist Add</option>
+          <option value="blacklist_remove">Blacklist Remove</option>
+          <option value="config_changed">Config Changed</option>
+        </select>
+
+        <select id="auditTimeFilter" class="audit-select" onchange="applyFilters()">
+          <option value="">All time</option>
+          <option value="today">Today</option>
+          <option value="week">Last 7 days</option>
+          <option value="month">Last 30 days</option>
+        </select>
+
+        <div class="audit-count">Showing <span id="auditShownCount">0</span> of <span id="auditTotalCount">0</span></div>
+
+        <button class="btn btn-ghost btn-sm" id="clearFiltersBtn" onclick="clearFilters()" style="display:none">
+          Clear filters
+        </button>
+      </div>
+
+      <!-- Table -->
+      <div class="audit-wrap">
+        <table class="audit-tbl">
+          <thead>
+            <tr>
+              <th style="width:148px">Timestamp</th>
+              <th style="width:170px">Action</th>
+              <th style="width:140px">Performed By</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="auditBody">
+            <tr><td colspan="4"><div class="audit-empty"><div>Loading…</div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Load more -->
+      <div style="text-align:center;margin-top:14px">
+        <button id="loadMoreBtn" class="btn btn-secondary" onclick="loadMore()" style="display:none">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          Load more
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script>
+    const API   = 'http://localhost:3000';
+    const token = localStorage.getItem('dlv_token');
+    const user  = localStorage.getItem('dlv_user');
+    const role  = localStorage.getItem('dlv_role');
+
+    if (!token || role !== 'admin') { location.href = '/index.html'; }
+
+    document.getElementById('sidebarUsername').textContent = user || '—';
+    document.getElementById('sidebarAvatar').textContent   = (user || '?').slice(0, 2).toUpperCase();
+
+    // Theme toggle
+    (function(){ const btn=document.getElementById('themeToggle'); if(!btn)return;
+      btn.textContent=document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+      btn.addEventListener('click',()=>{const cur=document.documentElement.getAttribute('data-theme');
+        const next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);
+        localStorage.setItem('dlv_theme',next);btn.textContent=next==='light'?'☀️':'🌙';});})();
+
+    function logout() { localStorage.clear(); location.href = '/index.html'; }
+
+    // ── Live clock ────────────────────────────────────────────────────────────
+    (function startClock() {
+      function tick() {
+        const now = new Date();
+        const hh  = String(now.getHours()).padStart(2,'0');
+        const mm  = String(now.getMinutes()).padStart(2,'0');
+        const ss  = String(now.getSeconds()).padStart(2,'0');
+        const el  = document.getElementById('topbarClock');
+        if (el) el.textContent = `${hh}:${mm}:${ss}`;
+      }
+      tick(); setInterval(tick, 1000);
+    })();
+
+    function toast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast toast-${type}`;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    async function apiFetch(path, method = 'GET', body) {
+      const opts = { method, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } };
+      if (body) opts.body = JSON.stringify(body);
+      return fetch(API + path, opts);
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Action metadata ───────────────────────────────────────────────────────
+    const ACTION_META = {
+      login:            { label:'Login',             cls:'arow-success', chip:'chip-green',  icon:'M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3' },
+      login_failed:     { label:'Login Failed',      cls:'arow-danger',  chip:'chip-red',    icon:'M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10' },
+      user_created:     { label:'User Created',      cls:'arow-info',    chip:'chip-blue',   icon:'M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M8.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM20 8v6M23 11h-6' },
+      user_deleted:     { label:'User Deleted',      cls:'arow-danger',  chip:'chip-red',    icon:'M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M8.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 11h-6' },
+      user_suspended:   { label:'User Suspended',    cls:'arow-warning', chip:'chip-yellow', icon:'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z' },
+      user_unsuspended: { label:'User Unsuspended',  cls:'arow-success', chip:'chip-green',  icon:'M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z' },
+      role_changed:     { label:'Role Changed',      cls:'arow-info',    chip:'chip-blue',   icon:'M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM12 12h.01' },
+      password_reset:   { label:'Password Reset',    cls:'arow-warning', chip:'chip-yellow', icon:'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z' },
+      session_created:  { label:'Session Created',   cls:'arow-muted',   chip:'chip-muted',  icon:'M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z' },
+      session_deleted:  { label:'Session Deleted',   cls:'arow-warning', chip:'chip-orange', icon:'M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m4-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16' },
+      broadcast:        { label:'Broadcast',         cls:'arow-purple',  chip:'chip-purple', icon:'M11 5 6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07' },
+      csv_export:       { label:'CSV Export',        cls:'arow-muted',   chip:'chip-muted',  icon:'M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z' },
+      blacklist_add:    { label:'Blacklisted',       cls:'arow-danger',  chip:'chip-red',    icon:'M18.364 18.364A9 9 0 1 1 5.636 5.636a9 9 0 0 1 12.728 12.728zM9.88 9.88A3 3 0 0 0 12 15a3 3 0 0 0 2.121-5.121M9.88 9.88L14.12 14.12' },
+      blacklist_remove: { label:'Unblacklisted',     cls:'arow-success', chip:'chip-green',  icon:'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0 1 12 2.944a11.955 11.955 0 0 1-8.618 3.04A12.02 12.02 0 0 0 3 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
+      config_changed:   { label:'Config Changed',    cls:'arow-warning', chip:'chip-yellow', icon:'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
+    };
+    const CHIP_COLORS = {
+      'chip-green':  { bg:'rgba(46,204,113,.12)',  color:'#2ecc71', border:'rgba(46,204,113,.25)'  },
+      'chip-red':    { bg:'rgba(231,76,60,.12)',   color:'#e74c3c', border:'rgba(231,76,60,.25)'   },
+      'chip-blue':   { bg:'rgba(52,152,219,.12)',  color:'#3498db', border:'rgba(52,152,219,.25)'  },
+      'chip-yellow': { bg:'rgba(243,156,18,.12)',  color:'#f39c12', border:'rgba(243,156,18,.25)'  },
+      'chip-orange': { bg:'rgba(230,126,34,.12)',  color:'#e67e22', border:'rgba(230,126,34,.25)'  },
+      'chip-purple': { bg:'rgba(155,89,182,.12)',  color:'#9b59b6', border:'rgba(155,89,182,.25)'  },
+      'chip-muted':  { bg:'rgba(107,113,148,.1)',  color:'#6b7194', border:'rgba(107,113,148,.2)'  },
+    };
+
+    function chipHtml(action) {
+      const m = ACTION_META[action];
+      if (!m) { return `<span class="a-chip" style="background:var(--bg4);color:var(--text-dim);border:1px solid var(--border)">${esc(action.replace(/_/g,' '))}</span>`; }
+      const c = CHIP_COLORS[m.chip] || CHIP_COLORS['chip-muted'];
+      return `<span class="a-chip" style="background:${c.bg};color:${c.color};border:1px solid ${c.border}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${m.icon}"/></svg>
+        ${esc(m.label)}
+      </span>`;
+    }
+
+    function detailsHtml(details) {
+      if (!details || typeof details !== 'object') return '<span class="text-dim">—</span>';
+      const entries = Object.entries(details).filter(([, v]) => v !== undefined && v !== null && v !== '');
+      if (!entries.length) return '<span class="text-dim">—</span>';
+      return `<div class="a-detail">${entries.map(([k, v]) =>
+        `<span class="a-kv"><span class="a-kv-key">${esc(k)}</span><span class="a-kv-val" title="${esc(String(v))}">${esc(String(v))}</span></span>`
+      ).join('')}</div>`;
+    }
+
+    // Relative time in a human-friendly way
+    function relTime(iso) {
+      const ms = Date.now() - new Date(iso).getTime();
+      if (ms < 60000)              return 'just now';
+      if (ms < 3600000)            return `${Math.floor(ms/60000)}m ago`;
+      if (ms < 86400000)           return `${Math.floor(ms/3600000)}h ago`;
+      if (ms < 86400000 * 7)       return `${Math.floor(ms/86400000)}d ago`;
+      return new Date(iso).toLocaleDateString();
+    }
+
+    // ── Data store ────────────────────────────────────────────────────────────
+    let allEntries  = [];
+    let filtered    = [];
+    let offset      = 0;
+    const LIMIT     = 200;
+    let fullyLoaded = false;
+
+    // ── Load from API ─────────────────────────────────────────────────────────
+    async function loadAudit(reset = false) {
+      if (reset) { offset = 0; fullyLoaded = false; allEntries = []; }
+
+      const res = await apiFetch(`/api/audit?limit=${LIMIT}&offset=${offset}`);
+      if (!res.ok) { toast('Failed to load audit log', 'error'); return; }
+      const data = await res.json();
+
+      // ✅ FIX: backend returns { audit: [...], total: N }
+      const entries = data.audit || [];
+      allEntries = reset ? entries : [...allEntries, ...entries];
+
+      fullyLoaded = entries.length < LIMIT;
+      document.getElementById('loadMoreBtn').style.display = fullyLoaded ? 'none' : '';
+      offset = allEntries.length;
+
+      document.getElementById('auditTotalCount').textContent = data.total ?? allEntries.length;
+      renderStats();
+      applyFilters();
+    }
+
+    // ── Stats tiles ───────────────────────────────────────────────────────────
+    function renderStats() {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const todayCount  = allEntries.filter(e => new Date(e.timestamp) >= today).length;
+      const failedLogins = allEntries.filter(e => e.action === 'login_failed').length;
+      const dangerous   = allEntries.filter(e => ['user_deleted','blacklist_add','config_changed'].includes(e.action)).length;
+      const uniqueUsers  = new Set(allEntries.map(e => e.by).filter(Boolean)).size;
+      document.getElementById('auditStats').innerHTML = `
+        <div class="as-tile"><div class="as-val">${allEntries.length}</div><div class="as-lbl">Total Events</div></div>
+        <div class="as-tile"><div class="as-val text-blue">${todayCount}</div><div class="as-lbl">Today</div></div>
+        <div class="as-tile"><div class="as-val text-red">${failedLogins}</div><div class="as-lbl">Failed Logins</div></div>
+        <div class="as-tile"><div class="as-val text-yellow">${dangerous}</div><div class="as-lbl">High-risk Actions</div></div>
+        <div class="as-tile"><div class="as-val">${uniqueUsers}</div><div class="as-lbl">Unique Users</div></div>
+      `;
+      renderHeatmap();
+    }
+
+    // ── Activity heatmap ──────────────────────────────────────────────────────
+    function renderHeatmap() {
+      const WEEKS = 14;
+      const DAYS  = WEEKS * 7;
+      // Build date-count map
+      const counts = {};
+      allEntries.forEach(e => {
+        if (!e.timestamp) return;
+        const d = new Date(e.timestamp);
+        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        counts[key] = (counts[key] || 0) + 1;
+      });
+
+      // Build array of last DAYS days, starting from most recent sunday
+      const today = new Date(); today.setHours(0,0,0,0);
+      // Align to the end of the current week (Saturday = day 6)
+      const dayOfWeek = today.getDay(); // 0=sun
+      const gridEnd = new Date(today);
+      gridEnd.setDate(today.getDate() + (6 - dayOfWeek));
+
+      const days = [];
+      for (let i = DAYS - 1; i >= 0; i--) {
+        const d = new Date(gridEnd);
+        d.setDate(gridEnd.getDate() - i);
+        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        days.push({ key, count: counts[key] || 0, date: new Date(d) });
+      }
+
+      // Find max for scaling
+      const maxCount = Math.max(...days.map(d => d.count), 1);
+
+      // Build weeks (columns of 7)
+      const grid = document.getElementById('heatGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      for (let w = 0; w < WEEKS; w++) {
+        const weekEl = document.createElement('div');
+        weekEl.className = 'heat-week';
+        for (let d = 0; d < 7; d++) {
+          const day = days[w * 7 + d];
+          if (!day) { weekEl.appendChild(document.createElement('div')); continue; }
+          const cell = document.createElement('div');
+          const level = day.count === 0 ? 0
+                      : day.count <= maxCount * 0.25 ? 1
+                      : day.count <= maxCount * 0.5  ? 2
+                      : day.count <= maxCount * 0.75 ? 3 : 4;
+          cell.className = `heat-cell heat-${level}`;
+          cell.title = `${day.date.toDateString()}: ${day.count} events`;
+          weekEl.appendChild(cell);
+        }
+        grid.appendChild(weekEl);
+      }
+
+      const total = days.reduce((s, d) => s + d.count, 0);
+      const subtitle = document.getElementById('heatSubtitle');
+      if (subtitle) subtitle.textContent = `${total} events across last ${WEEKS} weeks`;
+    }
+
+    // ── Filtering ─────────────────────────────────────────────────────────────
+    function applyFilters() {
+      const search  = document.getElementById('auditSearch').value.toLowerCase().trim();
+      const action  = document.getElementById('auditActionFilter').value;
+      const timeVal = document.getElementById('auditTimeFilter').value;
+
+      const now = Date.now();
+      const timeMs = timeVal === 'today'  ? 86400000
+                   : timeVal === 'week'   ? 7 * 86400000
+                   : timeVal === 'month'  ? 30 * 86400000 : 0;
+
+      filtered = allEntries.filter(e => {
+        if (action  && e.action !== action) return false;
+        if (timeMs  && now - new Date(e.timestamp).getTime() > timeMs) return false;
+        if (search) {
+          const hay = `${e.action} ${e.by} ${JSON.stringify(e.details || {})}`.toLowerCase();
+          if (!hay.includes(search)) return false;
+        }
+        return true;
+      });
+
+      const hasFilter = search || action || timeVal;
+      document.getElementById('clearFiltersBtn').style.display = hasFilter ? '' : 'none';
+      document.getElementById('auditShownCount').textContent = filtered.length;
+      renderRows(filtered);
+    }
+
+    function clearFilters() {
+      document.getElementById('auditSearch').value = '';
+      document.getElementById('auditActionFilter').value = '';
+      document.getElementById('auditTimeFilter').value = '';
+      applyFilters();
+    }
+
+    // ── Render table ──────────────────────────────────────────────────────────
+    function renderRows(entries) {
+      const body = document.getElementById('auditBody');
+      if (!entries.length) {
+        body.innerHTML = `<tr><td colspan="4"><div class="audit-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/></svg>
+          <div class="audit-empty-title">No entries found</div>
+          <div>Try clearing your filters or refreshing.</div>
+        </div></td></tr>`;
+        return;
+      }
+
+      const m = ACTION_META;
+      body.innerHTML = entries.map(e => {
+        const rowCls = (m[e.action] || {}).cls || 'arow-muted';
+        // ✅ FIX: backend uses `timestamp`, not `at`
+        const ts  = e.timestamp ? new Date(e.timestamp) : null;
+        const tsStr   = ts ? ts.toLocaleString()   : '—';
+        const tsRel   = ts ? relTime(e.timestamp)  : '';
+        const actor   = e.by || 'system';
+        const isSystem = actor === 'system';
+        return `<tr class="${rowCls}">
+          <td>
+            <div class="a-ts">${esc(tsStr)}</div>
+            <div class="a-ts-rel">${esc(tsRel)}</div>
+          </td>
+          <td>${chipHtml(e.action)}</td>
+          <td>
+            <div class="a-actor">
+              <div class="a-avatar ${isSystem ? 'a-avatar-system' : ''}">${esc(actor.slice(0,2).toUpperCase())}</div>
+              <span class="a-actor-name">${esc(actor)}</span>
+            </div>
+          </td>
+          <td>${detailsHtml(e.details)}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ── Load more ─────────────────────────────────────────────────────────────
+    function loadMore() {
+      if (!fullyLoaded) loadAudit(false);
+    }
+
+    // ── Auto-refresh ──────────────────────────────────────────────────────────
+    let arInterval = null;
+    let arEnabled  = false;
+    function toggleAutoRefresh() {
+      arEnabled = !arEnabled;
+      const btn = document.getElementById('autoRefreshBtn');
+      if (arEnabled) {
+        arInterval = setInterval(() => loadAudit(true), 30000);
+        btn.style.color = 'var(--accent)';
+        btn.title = 'Auto-refresh ON (30s) — click to disable';
+        toast('Auto-refresh enabled', 'info');
+      } else {
+        clearInterval(arInterval);
+        btn.style.color = '';
+        btn.title = 'Auto-refresh every 30s';
+        toast('Auto-refresh disabled', 'info');
+      }
+    }
+
+    loadAudit(true);
+  </script>
+</body>
+</html>
+

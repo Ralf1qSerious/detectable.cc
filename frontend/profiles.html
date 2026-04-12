@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>detectable.cc — Profiles</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body class="app-body">
+<script>
+  (function(){const t=localStorage.getItem('dlv_theme');if(t)document.documentElement.setAttribute('data-theme',t);})();
+</script>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-dot brand-dot-sm"></span>
+      <span class="sidebar-brand-name">detectable<span class="brand-tld">.lv</span></span>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a href="/dashboard.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Sessions
+      </a>
+      <a href="/profiles.html" class="sidebar-link active">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Profiles
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-username" id="sidebarUsername">—</div>
+          <div class="sidebar-role" id="sidebarRoleLabel">Checker</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm sidebar-logout" onclick="logout()" title="Sign out">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="topbar-title">Player Profiles</h1>
+        <span class="topbar-sub">All scanned players and their history</span>
+      </div>
+      <div class="topbar-right">
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search player…" oninput="filterProfiles()" style="max-width:220px" />
+        </div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- Risk filter pills -->
+      <div class="action-bar" style="margin-bottom:18px">
+        <div class="filter-pills">
+          <button class="filter-pill active" data-filter="all"      onclick="setFilter(this)">All</button>
+          <button class="filter-pill" data-filter="critical"        onclick="setFilter(this)">Critical</button>
+          <button class="filter-pill" data-filter="high"            onclick="setFilter(this)">High</button>
+          <button class="filter-pill" data-filter="medium"          onclick="setFilter(this)">Medium</button>
+          <button class="filter-pill" data-filter="clean"           onclick="setFilter(this)">Clean</button>
+        </div>
+      </div>
+
+      <div id="profilesGrid" class="profiles-grid"></div>
+      <div id="noProfiles" class="empty-state hidden">
+        <div class="empty-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <p class="empty-title">No profiles yet</p>
+        <p class="empty-sub">Profiles appear here once a scan session completes.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Add Checker Modal -->
+  <div class="modal-overlay hidden" id="registerModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Add Checker Account</h2>
+        <button class="modal-close" onclick="closeRegisterModal()">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="regUsername" placeholder="username" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="regPassword" placeholder="••••••••" />
+        </div>
+        <div id="regError" class="error-msg hidden"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeRegisterModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="registerChecker()">Create Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Blacklist Modal -->
+  <div class="modal-overlay hidden" id="blacklistModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Blacklist Player</h2>
+        <button class="modal-close" onclick="closeBlacklistModal()">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--text-muted);font-size:13px;margin-bottom:14px">Adding <strong id="blTargetName"></strong> to the blacklist will show a warning badge on all future scans.</p>
+        <div class="form-group">
+          <label>Reason <span class="optional">(optional)</span></label>
+          <input type="text" id="blReason" placeholder="e.g. Known cheater, VAC banned alt…" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeBlacklistModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmBlacklist()">Blacklist Player</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Note Modal -->
+  <div class="modal-overlay hidden" id="noteModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Add Note</h2>
+        <button class="modal-close" onclick="closeNoteModal()">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--text-muted);font-size:13px;margin-bottom:14px">Note for <strong id="noteTargetName"></strong></p>
+        <div class="form-group">
+          <label>Note</label>
+          <textarea id="noteText" rows="3" placeholder="e.g. Suspected VAC ban evasion…"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeNoteModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const token = localStorage.getItem('dlv_token');
+    const user  = localStorage.getItem('dlv_user');
+    const role  = localStorage.getItem('dlv_role');
+    if (!token) window.location.href = '/';
+
+    const _su = document.getElementById('sidebarUsername');
+    const _sa = document.getElementById('sidebarAvatar');
+    const _rl = document.getElementById('sidebarRoleLabel');
+    if (_su) _su.textContent = user || '—';
+    if (_sa) _sa.textContent = (user || '?')[0].toUpperCase();
+    if (_rl) _rl.textContent = role === 'admin' ? 'Administrator' : 'Checker';
+
+    // Theme toggle
+    (function(){ const btn=document.getElementById('themeToggle'); if(!btn)return;
+      btn.textContent=document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+      btn.addEventListener('click',()=>{const cur=document.documentElement.getAttribute('data-theme');
+        const next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);
+        localStorage.setItem('dlv_theme',next);btn.textContent=next==='light'?'☀️':'🌙';});})();
+
+    if (role === 'admin') {
+      const nav = document.getElementById('sidebarNav');
+      if (nav) {
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <div class="sidebar-section-label">Admin</div>
+          <a href="/users.html" class="sidebar-link">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Users
+          </a>
+          <a href="/audit.html" class="sidebar-link">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Audit Log
+          </a>
+          <a href="/settings.html" class="sidebar-link">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Settings
+          </a>`;
+        nav.appendChild(div);
+      }
+    }
+
+    let allProfiles  = [];
+    let activeFilter = 'all';
+
+    async function loadProfiles() {
+      const res  = await apiFetch('/api/profiles');
+      const data = await res.json();
+      allProfiles = data.profiles || [];
+      render();
+    }
+
+    function render() {
+      const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
+      const filtered = allProfiles.filter(p => {
+        if (activeFilter !== 'all' && p.highestRisk !== activeFilter) return false;
+        if (query && !p.targetName.toLowerCase().includes(query)) return false;
+        return true;
+      });
+
+      const grid  = document.getElementById('profilesGrid');
+      const empty = document.getElementById('noProfiles');
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      grid.innerHTML = filtered.map(p => {
+        const riskColor = { clean:'var(--green)', low:'var(--blue)', medium:'var(--yellow)', high:'var(--orange)', critical:'var(--red)' }[p.highestRisk] || 'var(--text-muted)';
+        const initials  = p.targetName.slice(0, 2).toUpperCase();
+        const lastDate  = new Date(p.lastScan).toLocaleDateString();
+        const scansLink = p.scans.map(s =>
+          `<a href="/session.html?id=${s.id}" class="scan-pill sev-${s.riskLevel||'clean'}">${(s.riskLevel||'clean').toUpperCase()} ${s.riskScore ?? ''}${s.riskScore != null ? '/100' : ''}</a>`
+        ).join('');
+        const blBadge  = p.blacklisted ? `<span class="blacklist-badge" title="${esc(p.blacklistInfo?.reason||'Blacklisted')}">&#x2620; Blacklisted</span>` : '';
+        const blBtn    = role === 'admin'
+          ? (p.blacklisted
+            ? `<button class="btn btn-ghost btn-sm" onclick="removeBlacklist('${esc(p.targetName)}')">Remove Blacklist</button>`
+            : `<button class="btn btn-danger btn-sm" onclick="openBlacklistModal('${esc(p.targetName)}')">Blacklist</button>`)
+          : '';
+        const notesHtml = role === 'admin' && p.notes?.length
+          ? `<div class="profile-notes">${p.notes.map(n => `
+              <div class="profile-note">
+                <span class="profile-note-text">${esc(n.text)}</span>
+                <span class="profile-note-meta">— ${esc(n.by)} &bull; ${new Date(n.at).toLocaleDateString()}</span>
+                <button class="profile-note-del" onclick="deleteNote('${esc(p.targetName)}','${n.id}')">&#x2715;</button>
+              </div>`).join('')}</div>` : '';
+        const addNoteBtn = role === 'admin'
+          ? `<button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="openNoteModal('${esc(p.targetName)}')">+ Add Note</button>` : '';
+
+        return `
+          <div class="profile-card${p.blacklisted ? ' profile-blacklisted' : ''}">
+            <div class="profile-avatar" style="background:${riskColor}22;border-color:${riskColor}44;color:${riskColor}">${initials}</div>
+            <div class="profile-body">
+              <div class="profile-name">
+                <a href="/profiles/${encodeURIComponent(p.targetName)}" style="color:inherit">${esc(p.targetName)}</a>
+                ${blBadge}
+              </div>
+              <div class="profile-meta">
+                <span>${p.scans.length} scan${p.scans.length !== 1 ? 's' : ''}</span>
+                <span>·</span>
+                <span>Last: ${lastDate}</span>
+                <span>·</span>
+                <span>Highest: <span class="sev-pill sev-${p.highestRisk}">${p.highestRisk.toUpperCase()}</span></span>
+              </div>
+              <div class="profile-scans">${scansLink}</div>
+              ${notesHtml}
+              ${addNoteBtn}
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;align-self:flex-start">${blBtn}</div>
+          </div>`;
+      }).join('');
+    }
+
+    function filterProfiles() { render(); }
+    function setFilter(el) {
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      activeFilter = el.dataset.filter;
+      render();
+    }
+
+    function openRegisterModal()  { document.getElementById('registerModal').classList.remove('hidden'); }
+    function closeRegisterModal() {
+      document.getElementById('registerModal').classList.add('hidden');
+      document.getElementById('regUsername').value = '';
+      document.getElementById('regPassword').value = '';
+      document.getElementById('regError').classList.add('hidden');
+    }
+    async function registerChecker() {
+      const username = document.getElementById('regUsername').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const err = document.getElementById('regError');
+      err.classList.add('hidden');
+      try {
+        const res  = await apiFetch('/api/auth/register', 'POST', { username, password });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        closeRegisterModal();
+        toast(`Checker '${username}' created`, 'success');
+      } catch (e) { err.textContent = e.message; err.classList.remove('hidden'); }
+    }
+
+    function logout() { localStorage.clear(); window.location.href = '/'; }
+    function esc(str) {
+      return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function apiFetch(url, method = 'GET', body = null) {
+      const opts = { method, headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` } };
+      if (body) opts.body = JSON.stringify(body);
+      return fetch(url, opts).then(r => { if (r.status === 401) logout(); return r; });
+    }
+    function toast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`; el.textContent = msg;
+      c.appendChild(el);
+      setTimeout(() => { el.classList.add('hiding'); el.addEventListener('animationend', () => el.remove()); }, 3000);
+    }
+
+    // ── Blacklist ──────────────────────────────────────────────────────────────
+    let _blTarget = null;
+    function openBlacklistModal(name) {
+      _blTarget = name;
+      document.getElementById('blReason').value = '';
+      document.getElementById('blTargetName').textContent = name;
+      document.getElementById('blacklistModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('blReason').focus(), 50);
+    }
+    function closeBlacklistModal() { document.getElementById('blacklistModal').classList.add('hidden'); _blTarget = null; }
+    async function confirmBlacklist() {
+      const reason = document.getElementById('blReason').value.trim();
+      const res  = await apiFetch('/api/blacklist', 'POST', { playerName: _blTarget, reason });
+      const data = await res.json();
+      if (!res.ok) return toast(data.error, 'error');
+      closeBlacklistModal();
+      toast(`${_blTarget} blacklisted`, 'info');
+      loadProfiles();
+    }
+    async function removeBlacklist(name) {
+      if (!confirm(`Remove ${name} from blacklist?`)) return;
+      const res  = await apiFetch(`/api/blacklist/${encodeURIComponent(name.toLowerCase())}`, 'DELETE');
+      const data = await res.json();
+      if (!res.ok) return toast(data.error, 'error');
+      toast(`${name} removed from blacklist`, 'success');
+      loadProfiles();
+    }
+
+    // ── Profile Notes ──────────────────────────────────────────────────────────
+    let _noteTarget = null;
+    function openNoteModal(name) {
+      _noteTarget = name;
+      document.getElementById('noteText').value = '';
+      document.getElementById('noteTargetName').textContent = name;
+      document.getElementById('noteModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('noteText').focus(), 50);
+    }
+    function closeNoteModal() { document.getElementById('noteModal').classList.add('hidden'); _noteTarget = null; }
+    async function saveNote() {
+      const text = document.getElementById('noteText').value.trim();
+      if (!text) return;
+      const res  = await apiFetch(`/api/profiles/${encodeURIComponent(_noteTarget)}/notes`, 'POST', { text });
+      const data = await res.json();
+      if (!res.ok) return toast(data.error, 'error');
+      closeNoteModal();
+      toast('Note added', 'success');
+      loadProfiles();
+    }
+    async function deleteNote(name, noteId) {
+      const res  = await apiFetch(`/api/profiles/${encodeURIComponent(name)}/notes/${noteId}`, 'DELETE');
+      if (!res.ok) return toast('Failed to delete note', 'error');
+      loadProfiles();
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      if (!document.getElementById('blacklistModal').classList.contains('hidden')) confirmBlacklist();
+      if (!document.getElementById('noteModal').classList.contains('hidden')) saveNote();
+    });
+
+    loadProfiles();
+  </script>
+</body>
+</html>

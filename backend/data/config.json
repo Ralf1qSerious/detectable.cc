@@ -1,0 +1,7 @@
+{
+  "sessionTtlHours": 24,
+  "maxSessionsPerChecker": 0,
+  "jwtExpiryHours": 12,
+  "requireInviteCode": true,
+  "alertRules": []
+}

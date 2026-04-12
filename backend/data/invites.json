@@ -1,0 +1,14 @@
+{
+  "95C846D1": {
+    "code": "95C846D1",
+    "createdBy": "Administrator",
+    "createdAt": "2026-04-11T23:48:29.510Z",
+    "usedBy": [
+      "Tester"
+    ],
+    "firstUsedAt": "2026-04-11T23:49:05.332Z",
+    "lastUsedAt": "2026-04-11T23:49:05.332Z",
+    "maxUses": 1,
+    "expiresAt": null
+  }
+}

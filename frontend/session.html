@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>detectable.cc — Session</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body class="app-body">
+<script>
+  (function(){const t=localStorage.getItem('dlv_theme');if(t)document.documentElement.setAttribute('data-theme',t);})();
+</script>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-dot brand-dot-sm"></span>
+      <span class="sidebar-brand-name">detectable<span class="brand-tld">.lv</span></span>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a href="/dashboard.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Sessions
+      </a>
+      <a href="/profiles.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Profiles
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-username" id="sidebarUsername">—</div>
+          <div class="sidebar-role" id="sidebarRoleLabel">Checker</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm sidebar-logout" onclick="logout()" title="Sign out">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main area ── -->
+  <div class="app-main">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <a href="/dashboard.html" class="back-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          Back
+        </a>
+        <h1 class="topbar-title" id="sessionTitle">Loading&hellip;</h1>
+      </div>
+      <div class="topbar-right">
+        <span class="badge" id="statusBadge">&mdash;</span>
+        <button class="btn btn-ghost btn-sm" id="shareBtn" style="display:none" onclick="shareSession()" title="Share session publicly">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Share
+        </button>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+      </div>
+    </header>
+
+    <div class="app-content">
+      <p class="page-sub" id="sessionMeta" style="margin-bottom:20px"></p>
+
+      <!-- Waiting -->
+      <div id="waitingState" class="wait-block hidden">
+        <div class="pulse-ring"></div>
+        <h3>Waiting for scanner&hellip;</h3>
+        <p>Send the session token to the player. They run <strong>DetectableLV.exe</strong> and paste it in.</p>
+        <div class="copy-row mt-16" style="max-width:420px;margin:16px auto 0">
+          <input type="text" id="waitTokenInput" readonly />
+          <button class="btn btn-secondary" onclick="copyWaitToken()">Copy Token</button>
+        </div>
+      </div>
+
+      <!-- Scanning -->
+      <div id="scanningState" class="wait-block hidden">
+        <div class="spinner"></div>
+        <h3>Scan in progress&hellip;</h3>
+        <p>The scanner is running on the target machine. Results appear automatically when done.</p>
+      </div>
+
+      <!-- Results -->
+      <div id="resultsState" class="hidden">
+
+      <!-- Risk bar -->
+      <div class="risk-bar-wrap section-card">
+        <div class="risk-bar-header">
+          <span class="risk-bar-label">Risk Score</span>
+          <span class="risk-bar-score" id="riskScoreNum">0</span>
+        </div>
+        <div class="risk-bar-track"><div class="risk-bar-fill" id="riskBarFill" style="width:0%"></div></div>
+        <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap" id="summaryRow"></div>
+      </div>
+
+      <!-- Verdict -->
+      <div class="verdict-banner" id="verdictBanner">
+        <div class="verdict-icon" id="verdictIcon"></div>
+        <div class="verdict-text">
+          <h3 id="verdictTitle"></h3>
+          <p id="verdictSub"></p>
+        </div>
+      </div>
+      <div id="verdictOverrideBanner" style="display:none"></div>
+
+      <!-- Tab bar -->
+      <div class="tab-bar" id="tabBar">
+        <button class="tab-btn active" data-tab="overview"  onclick="switchTab(this)">Overview</button>
+        <button class="tab-btn"        data-tab="processes" onclick="switchTab(this)">Processes <span class="tab-badge" id="tb-processes"></span></button>
+        <button class="tab-btn"        data-tab="modules"   onclick="switchTab(this)">Modules   <span class="tab-badge" id="tb-modules"></span></button>
+        <button class="tab-btn"        data-tab="network"   onclick="switchTab(this)">Network   <span class="tab-badge" id="tb-network"></span></button>
+        <button class="tab-btn"        data-tab="files"     onclick="switchTab(this)">Files     <span class="tab-badge" id="tb-files"></span></button>
+        <button class="tab-btn"        data-tab="registry"  onclick="switchTab(this)">Registry  <span class="tab-badge" id="tb-registry"></span></button>
+        <button class="tab-btn"        data-tab="software"  onclick="switchTab(this)">Software  <span class="tab-badge" id="tb-software"></span></button>
+        <button class="tab-btn"        data-tab="services"  onclick="switchTab(this)">Services  <span class="tab-badge" id="tb-services"></span></button>
+        <button class="tab-btn"        data-tab="tasks"     onclick="switchTab(this)">Tasks     <span class="tab-badge" id="tb-tasks"></span></button>
+        <button class="tab-btn"        data-tab="notes"     onclick="switchTab(this)">Notes</button>
+        <button class="tab-btn"        data-tab="raw"       onclick="switchTab(this)">Raw JSON</button>
+      </div>
+
+      <!-- ─── Overview Tab ─── -->
+      <div class="tab-content active" id="tab-overview">
+        <div class="section-card">
+          <div class="section-title">System Information</div>
+          <div class="info-grid" id="sysInfoGrid"></div>
+        </div>
+        <div class="section-card">
+          <div class="section-title">System Flags</div>
+          <div class="flags-grid" id="flagsGrid"></div>
+        </div>
+        <div class="section-card" id="flaggedSection">
+          <div class="section-title">Flagged Items <span class="section-title-count" id="flagCount">0</span></div>
+          <div class="flagged-list" id="flaggedList"></div>
+        </div>
+        <div class="section-card" id="screenshotSection">
+          <div class="section-title">Screenshot</div>
+          <div id="screenshotContainer"></div>
+        </div>
+      </div>
+
+      <!-- ─── Processes Tab ─── -->
+      <div class="tab-content" id="tab-processes">
+        <div class="section-card">
+          <div class="section-title">Running Processes</div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>PID</th><th>Path</th><th>Status</th></tr></thead>
+              <tbody id="processBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Modules Tab ─── -->
+      <div class="tab-content" id="tab-modules">
+        <div class="section-card">
+          <div class="section-title">Suspicious Loaded Modules</div>
+          <div id="modulesContent"></div>
+        </div>
+      </div>
+
+      <!-- ─── Network Tab ─── -->
+      <div class="tab-content" id="tab-network">
+        <div class="section-card">
+          <div class="section-title">Active Network Connections</div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Proto</th><th>Local</th><th>Remote</th><th>State</th><th>PID</th><th>Process</th><th>Flag</th></tr></thead>
+              <tbody id="networkBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Files Tab ─── -->
+      <div class="tab-content" id="tab-files">
+        <div class="section-card">
+          <div class="section-title">File System Findings</div>
+          <div id="filesFindings"></div>
+        </div>
+        <div class="section-card">
+          <div class="section-title">Recently Opened Files</div>
+          <div id="recentFiles"></div>
+        </div>
+      </div>
+
+      <!-- ─── Registry Tab ─── -->
+      <div class="tab-content" id="tab-registry">
+        <div class="section-card">
+          <div class="section-title">Registry Findings</div>
+          <div id="registryFindings"></div>
+        </div>
+      </div>
+
+      <!-- ─── Software Tab ─── -->
+      <div class="tab-content" id="tab-software">
+        <div class="section-card">
+          <div class="section-title">Installed Software</div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Publisher</th><th>Version</th><th>Install Date</th><th>Flag</th></tr></thead>
+              <tbody id="softwareBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Services Tab ─── -->
+      <div class="tab-content" id="tab-services">
+        <div class="section-card">
+          <div class="section-title">Windows Services &amp; Drivers</div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Display Name</th><th>State</th><th>Start</th><th>Path</th><th>Flag</th></tr></thead>
+              <tbody id="servicesBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Tasks Tab ─── -->
+      <div class="tab-content" id="tab-tasks">
+        <div class="section-card">
+          <div class="section-title">Scheduled Tasks</div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Path</th><th>Action</th><th>State</th><th>Flag</th></tr></thead>
+              <tbody id="tasksBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Notes Tab ─── -->
+      <div class="tab-content" id="tab-notes">
+        <!-- Verdict override — injected by JS for admin on completed sessions -->
+        <div id="verdictOverrideSection" style="display:none" class="section-card">
+          <div class="section-title">Admin — Verdict Override</div>
+          <div id="currentOverrideBanner" style="display:none" class="verdict-override-banner"></div>
+          <div class="verdict-override-form">
+            <div class="form-group" style="margin-bottom:.8rem">
+              <label style="font-size:.8rem;color:var(--muted);margin-bottom:.4rem;display:block">Override Verdict</label>
+              <select id="verdictSelect" class="form-select">
+                <option value="">— keep original —</option>
+                <option value="clean">Clean</option>
+                <option value="low">Low Risk</option>
+                <option value="medium">Medium Risk</option>
+                <option value="high">High Risk</option>
+                <option value="critical">Critical</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:.8rem">
+              <label style="font-size:.8rem;color:var(--muted);margin-bottom:.4rem;display:block">Reason</label>
+              <input type="text" id="verdictReason" placeholder="Why are you overriding this verdict?" maxlength="500" />
+            </div>
+            <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+              <button class="btn btn-primary btn-sm" onclick="overrideVerdict()">Apply Override</button>
+              <button class="btn btn-ghost btn-sm" onclick="removeOverride()" id="removeOverrideBtn" style="display:none">Remove Override</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin: Session Assignment -->
+        <div id="sessionAssignSection" style="display:none" class="section-card">
+          <div class="section-title">Reassign Session</div>
+          <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:.75rem">Transfer this session to a different checker account.</div>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center">
+            <select id="assignPicker" class="form-select" style="flex:1;min-width:140px;max-width:260px">
+              <option value="">— select checker —</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="assignSession()">Reassign</button>
+          </div>
+          <div id="assignedBy" style="font-size:.76rem;color:var(--text-muted);margin-top:.5rem"></div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+            Checker Notes
+            <span id="notesAdminBan" class="hidden"></span>
+          </div>
+          <div class="notes-panel">
+            <div class="notes-label">Private notes for this session</div>
+            <textarea class="notes-textarea" id="notesTextarea" placeholder="Add your notes about this scan…" maxlength="2000" oninput="onNotesInput()"></textarea>
+            <div class="notes-save-row">
+              <button class="btn btn-primary btn-sm" onclick="saveNotes()">Save Notes</button>
+              <span class="notes-saved-badge" id="notesSavedBadge">✓ Saved</span>
+              <span class="notes-char" id="notesCharCount">0 / 2000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Raw JSON Tab ─── -->
+      <div class="tab-content" id="tab-raw">
+        <div class="section-card">
+          <div class="section-title">Raw Scan Data</div>
+          <div id="rawJson" class="raw-json"></div>
+        </div>
+      </div>
+
+    </div><!-- /resultsState -->
+
+    </div><!-- /app-content -->
+  </div><!-- /app-main -->
+
+  <div id="toastContainer"></div>
+
+  <!-- Flagged Item Glossary Modal -->
+  <div class="modal-overlay hidden" id="glossaryModal">
+    <div class="modal" style="max-width:500px">
+      <div class="modal-header">
+        <h2 id="glossaryTitle">What is this?</h2>
+        <button class="modal-close" onclick="closeGlossary()">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom:.75rem">
+          <span id="glossarySevPill"></span>
+          <span id="glossaryCat" style="font-size:.78rem;color:var(--text-muted);margin-left:.5rem"></span>
+        </div>
+        <p id="glossaryExplain" style="font-size:.88rem;line-height:1.6;color:var(--text)"></p>
+        <div id="glossaryDetail" style="margin-top:.75rem;font-size:.8rem;color:var(--text-muted);background:var(--bg3);border-radius:6px;padding:.6rem .85rem;display:none"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeGlossary()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/assets/notify.js"></script>
+  <script src="/assets/session.js"></script>
+</body>
+</html>

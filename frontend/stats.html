@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>detectable.cc — Leaderboard</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body class="app-body">
+<script>(function(){const t=localStorage.getItem('dlv_theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-dot brand-dot-sm"></span>
+      <span class="sidebar-brand-name">detectable<span class="brand-tld">.lv</span></span>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a href="/dashboard.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Sessions
+      </a>
+      <a href="/profiles.html" class="sidebar-link">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Profiles
+      </a>
+      <a href="/stats" class="sidebar-link active">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Leaderboard
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-username" id="sidebarUsername">—</div>
+          <div class="sidebar-role" id="sidebarRoleLabel">Checker</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm sidebar-logout" onclick="logout()" title="Sign out">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="topbar-title">Leaderboard</h1>
+        <span class="topbar-sub">Checker activity &amp; stats</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-clock" id="topbarClock">--:--:--</div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+      </div>
+    </header>
+
+    <div class="app-content">
+      <div id="announcementBanner" style="display:none"></div>
+
+      <!-- Top 3 podium -->
+      <div class="lb-podium" id="lbPodium"></div>
+
+      <!-- Full leaderboard table -->
+      <div class="card" style="margin-top:1.5rem">
+        <div class="card-header" style="padding:1.2rem 1.5rem;border-bottom:1px solid var(--border)">
+          <h3 style="font-size:.95rem;font-weight:600;margin:0">All Checkers</h3>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="lb-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Checker</th>
+                <th>Total Scans</th>
+                <th>Finds</th>
+                <th>Find Rate</th>
+                <th>Avg Risk</th>
+                <th>Last Active</th>
+              </tr>
+            </thead>
+            <tbody id="lbTableBody">
+              <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- My stats card (self) -->
+      <div class="lb-my-stats" id="lbMyStats" style="display:none">
+        <h3>My Stats</h3>
+        <div class="lb-my-grid" id="lbMyGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = '';
+    const token = localStorage.getItem('dlv_token');
+    const role  = localStorage.getItem('dlv_role');
+    const me    = localStorage.getItem('dlv_user');
+
+    if (!token) location.href = '/index.html';
+
+    // Sidebar
+    document.getElementById('sidebarAvatar').textContent  = (me || '?').charAt(0).toUpperCase();
+    document.getElementById('sidebarUsername').textContent = me || '—';
+    document.getElementById('sidebarRoleLabel').textContent = role || 'Checker';
+
+    // Admin sidebar injection
+    if (role === 'admin') {
+      const nav = document.getElementById('sidebarNav');
+      const adminLinks = `
+        <div class="sidebar-divider">Admin</div>
+        <a href="/users.html" class="sidebar-link">
+          <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Users
+        </a>
+        <a href="/audit.html" class="sidebar-link">
+          <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Audit Log
+        </a>
+        <a href="/settings.html" class="sidebar-link">
+          <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Settings
+        </a>`;
+      nav.insertAdjacentHTML('beforeend', adminLinks);
+    }
+
+    // Clock
+    function tick() {
+      document.getElementById('topbarClock').textContent = new Date().toLocaleTimeString();
+    }
+    tick(); setInterval(tick, 1000);
+
+    // Theme
+    const themeToggle = document.getElementById('themeToggle');
+    function applyTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      themeToggle.textContent = t === 'dark' ? '🌙' : '☀️';
+    }
+    applyTheme(localStorage.getItem('dlv_theme') || 'dark');
+    themeToggle.addEventListener('click', () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('dlv_theme', next);
+      applyTheme(next);
+    });
+
+    function logout() {
+      localStorage.clear();
+      location.href = '/index.html';
+    }
+
+    const RANK_MEDALS = ['🥇', '🥈', '🥉'];
+    const RISK_COLORS = { clean: '#10b981', low: '#5b6ef5', medium: '#f59e0b', high: '#ef4444', critical: '#dc2626' };
+
+    async function loadBanner() {
+      try {
+        const r = await fetch('/api/banner', { headers: { Authorization: `Bearer ${token}` } });
+        const { banner } = await r.json();
+        const el = document.getElementById('announcementBanner');
+        if (banner) { el.style.display = ''; el.className = 'announcement-banner'; el.innerHTML = `<span>${banner.text}</span>`; }
+      } catch {}
+    }
+
+    async function loadStats() {
+      try {
+        const r = await fetch('/api/stats', { headers: { Authorization: `Bearer ${token}` } });
+        if (!r.ok) { renderError(); return; }
+        const { stats } = await r.json();
+        renderPodium(stats.slice(0, 3));
+        renderTable(stats);
+        const myStat = stats.find(s => s.username === me);
+        if (myStat) renderMyStats(myStat);
+      } catch { renderError(); }
+    }
+
+    function renderPodium(top) {
+      const podium = document.getElementById('lbPodium');
+      if (!top.length) { podium.innerHTML = ''; return; }
+      // Re-order for visual podium: 2nd, 1st, 3rd
+      const order = top.length >= 3 ? [top[1], top[0], top[2]] : top.length === 2 ? [top[1], top[0]] : [top[0]];
+      const heights = ['60px', '90px', '45px'];
+
+      podium.innerHTML = order.map((s, i) => {
+        const realRank = top.indexOf(s);
+        const height = top.length >= 3 ? heights[i] : '75px';
+        const medal = RANK_MEDALS[realRank] || `#${realRank + 1}`;
+        return `<div class="lb-podium-item lb-podium-rank-${realRank + 1}">
+          <div class="lb-podium-avatar">${medal}</div>
+          <div class="lb-podium-name">${escHtml(s.username)}</div>
+          <div class="lb-podium-scans">${s.scanCount} scans</div>
+          <div class="lb-podium-base" style="height:${height}">
+            <span class="lb-podium-rank-num">${realRank + 1}</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderTable(stats) {
+      const tbody = document.getElementById('lbTableBody');
+      if (!stats.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">No data yet</td></tr>';
+        return;
+      }
+      tbody.innerHTML = stats.map((s, i) => {
+        const findRate = s.scanCount ? Math.round(s.flaggedCount / s.scanCount * 100) : 0;
+        const isMe = s.username === me;
+        const lastActive = s.lastScan ? timeAgo(s.lastScan) : 'Never';
+        return `<tr class="${isMe ? 'lb-my-row' : ''}">
+          <td><span class="lb-rank">${i < 3 ? RANK_MEDALS[i] : '#' + (i + 1)}</span></td>
+          <td><span class="lb-username ${isMe ? 'lb-me' : ''}">${escHtml(s.username)}${isMe ? ' <span class="lb-you-badge">you</span>' : ''}</span></td>
+          <td><strong>${s.scanCount}</strong></td>
+          <td>${s.flaggedCount}</td>
+          <td><span class="lb-rate" style="color:${findRate > 50 ? '#ef4444' : findRate > 20 ? '#f59e0b' : '#10b981'}">${findRate}%</span></td>
+          <td><span class="lb-avg-risk">${s.avgRisk}</span></td>
+          <td style="color:var(--muted);font-size:.82rem">${lastActive}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function renderMyStats(s) {
+      const el = document.getElementById('lbMyStats');
+      const grid = document.getElementById('lbMyGrid');
+      el.style.display = '';
+      const findRate = s.scanCount ? Math.round(s.flaggedCount / s.scanCount * 100) : 0;
+      grid.innerHTML = [
+        ['Total Scans', s.scanCount],
+        ['Finds', s.flaggedCount],
+        ['Find Rate', findRate + '%'],
+        ['Avg Risk Score', s.avgRisk],
+        ['Last Scan', s.lastScan ? new Date(s.lastScan).toLocaleDateString() : 'Never'],
+      ].map(([l, v]) => `<div class="lb-my-stat-card"><div class="lb-stat-value">${v}</div><div class="lb-stat-label">${l}</div></div>`).join('');
+    }
+
+    function renderError() {
+      document.getElementById('lbTableBody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Failed to load stats</td></tr>';
+    }
+
+    function timeAgo(iso) {
+      const diff = Date.now() - new Date(iso).getTime();
+      const h = Math.floor(diff / 3600000);
+      if (h < 1) return 'Just now';
+      if (h < 24) return `${h}h ago`;
+      const d = Math.floor(h / 24);
+      if (d < 7) return `${d}d ago`;
+      return new Date(iso).toLocaleDateString();
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    loadBanner();
+    loadStats();
+  </script>
+</body>
+</html>
