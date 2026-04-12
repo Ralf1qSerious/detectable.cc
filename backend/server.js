@@ -503,7 +503,7 @@ app.get('/api/download/client', (req, res) => {
   const token = req.headers.authorization?.slice(7) || req.query.token;
   if (!token) return res.status(401).json({ error: 'Unauthorized' });
   try { jwt.verify(token, JWT_SECRET); } catch { return res.status(401).json({ error: 'Invalid token' }); }
-  const exePath = path.join(__dirname, '../client/DetectableLV/bin/Release/net8.0-windows/win-x64/publish/DetectableCC.exe');
+  const exePath = path.join(__dirname, 'downloads/DetectableCC.exe');
   if (!require('fs').existsSync(exePath)) return res.status(404).json({ error: 'Client not found' });
   res.download(exePath, 'DetectableCC.exe');
 });
@@ -714,7 +714,7 @@ app.delete('/api/banner', requireAdmin, (req, res) => {
 });
 
 // ─── Client Download ─────────────────────────────────────────────────────────
-const CLIENT_EXE = path.join(__dirname, '../client/DetectableLV/bin/Release/net8.0-windows/win-x64/publish/DetectableLV.exe');
+const CLIENT_EXE = path.join(__dirname, 'downloads/DetectableCC.exe');
 app.get('/api/download/client', (req, res) => {
   if (!fs.existsSync(CLIENT_EXE)) {
     return res.status(404).json({ error: 'Client binary not found. Please build the project first.' });

@@ -5,6 +5,9 @@ npm-debug.log*
 # .NET build outputs
 bin/
 obj/
+
+# Allow backend downloads folder (contains distributable exe)
+!backend/downloads/
 *.user
 *.suo
 .vs/
