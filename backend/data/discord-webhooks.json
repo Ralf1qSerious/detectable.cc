@@ -1,0 +1,25 @@
+{
+  "enabled": true,
+  "username": "detectable.cc Audit",
+  "avatarUrl": "",
+  "includeDetails": true,
+  "includeIp": true,
+  "maxDetailLength": 900,
+  "webhooks": {
+    "all": "https://discord.com/api/webhooks/1492898927010250862/M4r_KorQrQKt6MpRIQa3aJYRb5tm5T6V8hRXXvjuz3mOnjQe_-hK7MVCwgpEYkZu24MA",
+    "auth": "https://discord.com/api/webhooks/1492898988649742428/toS-DAxbgXmp9sTtzdfiCKCWMk9clr0ZhdQazZ4Qgo-9pgWlkjNz3W8Nmkd9frclm_zI",
+    "users": "https://discord.com/api/webhooks/1492899029749731369/tM1-TXncNuPnLibBybXa-eUDXxNzjVTnekwreAubfC57A6egowTZe73ifJQ0AoM988T3",
+    "sessions": "https://discord.com/api/webhooks/1492899068052115538/D9u4OCRMM-jXfIBWNmWX7pCFHa4EzCC8lSVv7CG32EcR34_NZgwKoLvTR5zxxd6zboM1",
+    "admin": "https://discord.com/api/webhooks/1492899108287942799/RnFFOpUXcpYpnK4t84V5RezlhLIG4kveA1N9QA0FyRLTVk3FYxs-1iSaay5RwIYMLupH",
+    "invites": "https://discord.com/api/webhooks/1492899150273183866/qLLvw5FxH7Hlt8-Kah4oDteTbKRnjX3wWshKiDGkMZPf6sE-WHz62xYxOXPC8x77fTuh",
+    "verdicts": "https://discord.com/api/webhooks/1492899204291498236/w3TmJBba9RbPsN44xxV_5P-zBGL6FdcFe6CEmTTE4iXB0MeMYiCy43WtiuaH4fkaGUaV",
+    "exports": "https://discord.com/api/webhooks/1492899253541011658/yJYa8sCeG9wd7oYEQnq1ABInNFK9I_Oasf9MGbwN9R-n252TfuPGbU0g-GI1Uv9sOSO4",
+    "security": "https://discord.com/api/webhooks/1492899289284743288/6ZifRxEEZBMzIUGJy8BpnncIu7N1K7moefrl2Rovh6lEdRK1pTpWMKImPPGucCeRoeZt"
+  },
+  "byAction": {
+    "login_failed": "https://discord.com/api/webhooks/1492899342544146615/F2fbbG3UvqnMlB3kXRI804TPjkhRj3mN0bk2pazhIvPHZ9cRGqiZZn2YGJyK8IXSw8tR",
+    "session_created": "https://discord.com/api/webhooks/1492899404536086692/_avxJZfOFKGDQ6uzlOYBHU7EQ26tZiAUMYfsR8w4gWyKz4FNJlngEiDWYApMfd00KCl1",
+    "session_deleted": "https://discord.com/api/webhooks/1492899455173787819/p7NJOI0pQVhwTs5TfE-u7NWK_YNyjDESmxI2x_2yYUGOaeHesym7kaM9YmYZGx071AAN",
+    "invite_created": "https://discord.com/api/webhooks/1492899509569720602/OnPbc8VUvG0-9SEZ1-GVlWYAYM7JmBQoozgsZlwigZVGFvcyR2IZOhpBZtYsXd-rPnDf"
+  }
+}

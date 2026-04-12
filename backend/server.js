@@ -32,6 +32,7 @@ const DATA_DIR       = path.join(__dirname, 'data');
 const SESSIONS_FILE  = path.join(DATA_DIR, 'sessions.json');
 const USERS_FILE     = path.join(DATA_DIR, 'users.json');
 const AUDIT_FILE     = path.join(DATA_DIR, 'audit.json');
+const DISCORD_WEBHOOKS_FILE = path.join(DATA_DIR, 'discord-webhooks.json');
 const NOTES_FILE     = path.join(DATA_DIR, 'notes.json');
 const CONFIG_FILE    = path.join(DATA_DIR, 'config.json');
 const BANNER_FILE    = path.join(DATA_DIR, 'banner.json');
@@ -52,6 +53,27 @@ function saveJSON(file, data) {
 const users    = new Map(Object.entries(loadJSON(USERS_FILE)));
 const sessions = new Map(Object.entries(loadJSON(SESSIONS_FILE)));
 let   auditLog     = loadJSON(AUDIT_FILE, []);
+let   discordWebhooks = {
+  enabled: false,
+  username: 'detectable.cc Audit',
+  avatarUrl: '',
+  includeDetails: true,
+  includeIp: false,
+  maxDetailLength: 900,
+  webhooks: {
+    all: '',
+    auth: '',
+    users: '',
+    sessions: '',
+    admin: '',
+    invites: '',
+    verdicts: '',
+    exports: '',
+    security: ''
+  },
+  byAction: {}
+};
+discordWebhooks = { ...discordWebhooks, ...loadJSON(DISCORD_WEBHOOKS_FILE, {}) };
 let   profileNotes = loadJSON(NOTES_FILE, {});
 let   config       = { sessionTtlHours: 24, maxSessionsPerChecker: 0, jwtExpiryHours: 12,
                        requireInviteCode: false, alertRules: [],
@@ -63,17 +85,128 @@ let   templates    = loadJSON(TEMPLATES_FILE, []);
 function persistUsers()     { saveJSON(USERS_FILE,    Object.fromEntries(users)); }
 function persistSessions()  { saveJSON(SESSIONS_FILE, Object.fromEntries(sessions)); }
 function persistAudit()     { saveJSON(AUDIT_FILE,    auditLog); }
+function persistDiscordWebhooks() { saveJSON(DISCORD_WEBHOOKS_FILE, discordWebhooks); }
 function persistNotes()     { saveJSON(NOTES_FILE,     profileNotes); }
 function persistConfig()    { saveJSON(CONFIG_FILE,    config); }
 function persistBanner()    { saveJSON(BANNER_FILE,    banner); }
 function persistInvites()   { saveJSON(INVITES_FILE,   invites); }
 function persistTemplates() { saveJSON(TEMPLATES_FILE, templates); }
 
+if (!fs.existsSync(DISCORD_WEBHOOKS_FILE)) persistDiscordWebhooks();
+
+function auditCategory(action = '') {
+  if (action.startsWith('login') || action.startsWith('password_')) return 'security';
+  if (action.startsWith('user_') || action.startsWith('role_') || action.startsWith('badges_')) return 'users';
+  if (action.startsWith('session_')) return 'sessions';
+  if (action.startsWith('invite_')) return 'invites';
+  if (action.startsWith('verdict_')) return 'verdicts';
+  if (action === 'csv_export') return 'exports';
+  if (action.startsWith('config_') || action.startsWith('banner_') || action.startsWith('template_') || action.startsWith('alert_') || action === 'broadcast') return 'admin';
+  return 'all';
+}
+
+function pickWebhookUrl(action = '') {
+  const byAction = discordWebhooks?.byAction || {};
+  if (typeof byAction[action] === 'string' && byAction[action].trim()) return byAction[action].trim();
+  const webhooks = discordWebhooks?.webhooks || {};
+  const byCategory = webhooks[auditCategory(action)];
+  if (typeof byCategory === 'string' && byCategory.trim()) return byCategory.trim();
+  if (typeof webhooks.all === 'string' && webhooks.all.trim()) return webhooks.all.trim();
+  return '';
+}
+
+function sanitizeDetails(input, includeIp = false) {
+  const redactedKeys = new Set([
+    'password', 'passwordHash', 'token', 'inviteCode', 'code', 'hwid', 'mac',
+    'screenshot', 'image', 'screenshotBase64', 'raw', 'ip'
+  ]);
+
+  function walk(value, parentKey = '') {
+    if (value === null || value === undefined) return value;
+    if (typeof value === 'string') {
+      const v = value.trim();
+      if (!v) return value;
+      if (v.length > 240) return `${v.slice(0, 237)}...`;
+      return value;
+    }
+    if (Array.isArray(value)) return value.map(v => walk(v, parentKey));
+    if (typeof value === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(value)) {
+        if (redactedKeys.has(k)) {
+          if (k === 'ip' && includeIp) out[k] = v;
+          else out[k] = '[REDACTED]';
+          continue;
+        }
+        out[k] = walk(v, k);
+      }
+      return out;
+    }
+    return value;
+  }
+
+  const cleaned = walk(input);
+  return cleaned && typeof cleaned === 'object' ? cleaned : {};
+}
+
+async function sendAuditToDiscord(entry) {
+  if (!discordWebhooks?.enabled) return;
+  const url = pickWebhookUrl(entry.action);
+  if (!url) return;
+
+  const includeDetails = discordWebhooks.includeDetails !== false;
+  const safeDetails = sanitizeDetails(entry.details || {}, discordWebhooks.includeIp === true);
+  const maxDetailLength = Math.max(200, parseInt(discordWebhooks.maxDetailLength, 10) || 900);
+  const detailsJson = JSON.stringify(safeDetails, null, 2);
+
+  const embed = {
+    title: `Audit: ${entry.action}`,
+    color: 0x2997ff,
+    timestamp: entry.timestamp,
+    fields: [
+      { name: 'By', value: String(entry.by || 'system'), inline: true },
+      { name: 'Category', value: auditCategory(entry.action), inline: true }
+    ]
+  };
+
+  if (includeDetails && detailsJson && detailsJson !== '{}' && detailsJson !== '[]') {
+    const limited = detailsJson.length > maxDetailLength
+      ? `${detailsJson.slice(0, maxDetailLength - 3)}...`
+      : detailsJson;
+    embed.fields.push({ name: 'Details', value: `\`\`\`json\n${limited}\n\`\`\`` });
+  }
+
+  const payload = {
+    username: discordWebhooks.username || 'detectable.cc Audit',
+    avatar_url: discordWebhooks.avatarUrl || undefined,
+    allowed_mentions: { parse: [] },
+    embeds: [embed]
+  };
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+    if (!r.ok) console.error(`[discord] webhook failed ${r.status} for action ${entry.action}`);
+  } catch (err) {
+    console.error('[discord] webhook error:', err?.message || err);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 // ─── Audit Helper ─────────────────────────────────────────────────────────────
 function addAudit(action, by, details = {}) {
-  auditLog.unshift({ id: uuidv4(), action, by, details, timestamp: new Date().toISOString() });
+  const entry = { id: uuidv4(), action, by, details, timestamp: new Date().toISOString() };
+  auditLog.unshift(entry);
   if (auditLog.length > 1000) auditLog = auditLog.slice(0, 1000);
   persistAudit();
+  void sendAuditToDiscord(entry);
 }
 
 let defaultAdminSeededThisBoot = false;
