@@ -9,7 +9,7 @@ internal static class Program
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
 
-        string serverUrl = "http://localhost:3000";
+        string serverUrl = "https://renderbackend-qdi8.onrender.com";
         if (args.Length >= 1 && args[0].StartsWith("http", StringComparison.OrdinalIgnoreCase))
             serverUrl = args[0].TrimEnd('/');
 
