@@ -323,11 +323,15 @@ function renderChatMessages(scrollBottom = false) {
   }
   list.innerHTML = chatState.messages.map(m => {
     const isDeleted = !!m.deleted;
-    const muteBtn = role === 'admin' && (m.by || '').toLowerCase() !== (user || '').toLowerCase()
-      ? `<button class="chat-delete-btn" onclick="muteChatUser('${encodeURIComponent(m.by || '')}')" title="Mute user">Mute</button>`
-      : '';
-    const delBtn = role === 'admin'
-      ? `<button class="chat-delete-btn" onclick="deleteChatMessage('${m.id}')" title="Delete message">Delete</button>`
+    const canMute = role === 'admin' && (m.by || '').toLowerCase() !== (user || '').toLowerCase();
+    const actionsMenu = role === 'admin' && !isDeleted
+      ? `<details class="chat-actions">
+          <summary class="chat-ellipsis-btn" title="Actions">...</summary>
+          <div class="chat-actions-menu">
+            ${canMute ? `<button class="chat-action-item" onclick="muteChatUser('${encodeURIComponent(m.by || '')}');this.closest('details').open=false;">Mute</button>` : ''}
+            <button class="chat-action-item chat-action-danger" onclick="deleteChatMessage('${m.id}');this.closest('details').open=false;">Delete</button>
+          </div>
+        </details>`
       : '';
     const deletedText = m.deletedBy ? `Deleted by ${esc(m.deletedBy)}` : 'Deleted by admin';
     return `<div class="chat-row" id="chat-${m.id}">
@@ -338,7 +342,7 @@ function renderChatMessages(scrollBottom = false) {
           ${_chatBadges(m)}
           <span class="chat-time">${_chatTime(m.timestamp)}</span>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">${isDeleted ? '' : `${muteBtn}${delBtn}`}</div>
+        ${actionsMenu}
       </div>
       <div class="chat-text${isDeleted ? ' chat-text-deleted' : ''}">${isDeleted ? `${deletedText}...` : esc(m.text)}</div>
     </div>`;

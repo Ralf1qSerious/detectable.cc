@@ -284,6 +284,25 @@ button{font-family:inherit}
 .chat-badge-trusted{color:#c8f7dc;background:rgba(46,204,113,.13);border-color:rgba(46,204,113,.28)}
 .chat-text{font-size:12.5px;white-space:pre-wrap;word-break:break-word;line-height:1.45}
 .chat-text-deleted{color:var(--text-muted);font-style:italic}
+.chat-actions{position:relative}
+.chat-actions summary{list-style:none}
+.chat-actions summary::-webkit-details-marker{display:none}
+.chat-ellipsis-btn{
+  background:transparent;border:1px solid var(--border2);color:var(--text-muted);
+  cursor:pointer;font-size:12px;line-height:1;padding:2px 8px;border-radius:6px;
+}
+.chat-ellipsis-btn:hover{color:var(--text);border-color:var(--accent)}
+.chat-actions-menu{
+  position:absolute;right:0;top:24px;min-width:120px;
+  background:var(--bg2);border:1px solid var(--border2);border-radius:8px;
+  box-shadow:var(--shadow-sm);padding:4px;display:flex;flex-direction:column;gap:2px;z-index:30;
+}
+.chat-action-item{
+  background:transparent;border:0;color:var(--text);text-align:left;
+  padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px;
+}
+.chat-action-item:hover{background:var(--bg3)}
+.chat-action-danger{color:var(--red)}
 .chat-delete-btn{background:transparent;border:0;color:var(--text-muted);cursor:pointer;font-size:11px;padding:0 2px}
 .chat-delete-btn:hover{color:var(--red)}
 .global-chat-typing{min-height:16px;padding:0 12px 6px;color:var(--text-muted);font-size:11px}
