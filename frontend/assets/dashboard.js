@@ -325,6 +325,7 @@ function renderChatMessages(scrollBottom = false) {
       <div class="chat-row-head">
         <div class="chat-row-meta">
           <span class="chat-by">${esc(m.by || 'Unknown')}</span>
+          ${m.userId ? `<span class="chat-time">${esc(m.userId)}</span>` : ''}
           ${_chatBadges(m)}
           <span class="chat-time">${_chatTime(m.timestamp)}</span>
         </div>
@@ -408,6 +409,7 @@ async function muteChatUser(encodedUsername) {
     return;
   }
   toast(`${username} muted for ${hours}h`, 'success');
+  loadMutedUsers();
 }
 
 function setChatMutedState(mutedUntil) {
@@ -435,6 +437,55 @@ async function loadChatStatus() {
   } catch {}
 }
 
+function renderMutedUsers(rows) {
+  const wrap = document.getElementById('chatMutedWrap');
+  const list = document.getElementById('chatMutedList');
+  if (!wrap || !list) return;
+  if (role !== 'admin') {
+    wrap.classList.add('hidden');
+    return;
+  }
+  wrap.classList.remove('hidden');
+  if (!rows.length) {
+    list.innerHTML = '<div class="text-muted" style="font-size:11px">No muted users.</div>';
+    return;
+  }
+  list.innerHTML = rows.map(r => `
+    <div class="chat-muted-row">
+      <div class="chat-muted-main">
+        <div class="chat-muted-user">${esc(r.username)}</div>
+        <div class="chat-muted-meta">${esc(r.userId || 'No ID')} · until ${new Date(r.mutedUntil).toLocaleString()}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="unmuteByUserId('${encodeURIComponent(r.userId || '')}')">Unmute</button>
+    </div>`).join('');
+}
+
+async function loadMutedUsers() {
+  if (role !== 'admin') return;
+  try {
+    const res = await apiFetch('/api/chat/muted');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Muted users fetch failed');
+    renderMutedUsers(Array.isArray(data.muted) ? data.muted : []);
+  } catch (e) {
+    console.error('muted-users', e);
+  }
+}
+
+async function unmuteByUserId(encodedUserId) {
+  if (role !== 'admin') return;
+  const userId = decodeURIComponent(encodedUserId || '');
+  if (!userId) return;
+  const res = await apiFetch('/api/chat/unmute', 'POST', { userId });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    toast(data.error || 'Unmute failed', 'error');
+    return;
+  }
+  toast(`Unmuted ${data.username || userId}`, 'success');
+  loadMutedUsers();
+}
+
 function initGlobalChat() {
   const clearBtn = document.getElementById('chatClearBtn');
   if (clearBtn && role === 'admin') clearBtn.classList.remove('hidden');
@@ -452,6 +503,7 @@ function initGlobalChat() {
   }
   loadChatStatus();
   loadChatMessages();
+  loadMutedUsers();
 }
 
 // ─── Sparkline ────────────────────────────────────────────────────────────────

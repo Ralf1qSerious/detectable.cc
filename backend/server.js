@@ -112,6 +112,27 @@ function persistInvites()   { saveJSON(INVITES_FILE,   invites); }
 function persistTemplates() { saveJSON(TEMPLATES_FILE, templates); }
 function persistChat()      { saveJSON(CHAT_FILE,      globalChat); }
 
+function generateUserId() {
+  return `DLV-${uuidv4().split('-')[0].toUpperCase()}`;
+}
+
+function ensureUserId(userObj) {
+  if (!userObj) return null;
+  if (!userObj.userId) userObj.userId = generateUserId();
+  return userObj.userId;
+}
+
+function ensureAllUserIds() {
+  let changed = false;
+  for (const u of users.values()) {
+    if (!u.userId) {
+      u.userId = generateUserId();
+      changed = true;
+    }
+  }
+  if (changed) persistUsers();
+}
+
 if (!fs.existsSync(DISCORD_WEBHOOKS_FILE)) persistDiscordWebhooks();
 
 function auditCategory(action = '') {
@@ -238,13 +259,14 @@ let defaultAdminSeededThisBoot = false;
 (async () => {
   if (users.size === 0) {
     const hash = await bcrypt.hash('admin123', 12);
-    users.set('admin', { username: 'admin', passwordHash: hash, role: 'admin', createdAt: new Date().toISOString() });
+    users.set('admin', { username: 'admin', userId: generateUserId(), passwordHash: hash, role: 'admin', createdAt: new Date().toISOString() });
     defaultAdminSeededThisBoot = true;
     persistUsers();
   } else if (users.has('admin') && users.get('admin').role !== 'admin') {
     users.get('admin').role = 'admin';
     persistUsers();
   }
+  ensureAllUserIds();
   persistConfig();
 })();
 
@@ -343,8 +365,8 @@ app.post('/api/auth/login', async (req, res) => {
 // List all users
 app.get('/api/users', requireAdmin, (req, res) => {
   const list = Array.from(users.values()).map(
-    ({ username, role, createdAt, lastLoginAt, suspended, badges }) =>
-      ({ username, role, createdAt, lastLoginAt, suspended: !!suspended, badges: badges || [] })
+    ({ username, userId, role, createdAt, lastLoginAt, suspended, badges }) =>
+      ({ username, userId, role, createdAt, lastLoginAt, suspended: !!suspended, badges: badges || [] })
   );
   res.json({ users: list });
 });
@@ -356,7 +378,7 @@ app.post('/api/users', requireAdmin, async (req, res) => {
   if (!['admin', 'checker'].includes(role)) return res.status(400).json({ error: 'Role must be admin or checker' });
   if (users.has(username.toLowerCase())) return res.status(409).json({ error: 'Username already taken' });
   const hash = await bcrypt.hash(password, 12);
-  users.set(username.toLowerCase(), { username, passwordHash: hash, role, createdAt: new Date().toISOString() });
+  users.set(username.toLowerCase(), { username, userId: generateUserId(), passwordHash: hash, role, createdAt: new Date().toISOString() });
   persistUsers();
   addAudit('user_created', req.user.username, { target: username, role });
   res.json({ message: 'User created', username, role });
@@ -450,7 +472,7 @@ app.post('/api/auth/register', requireAdmin, async (req, res) => {
   if (users.has(username.toLowerCase()))
     return res.status(409).json({ error: 'Username already taken' });
   const hash = await bcrypt.hash(password, 12);
-  users.set(username.toLowerCase(), { username, passwordHash: hash, role: 'checker', createdAt: new Date().toISOString() });
+  users.set(username.toLowerCase(), { username, userId: generateUserId(), passwordHash: hash, role: 'checker', createdAt: new Date().toISOString() });
   persistUsers();
   res.json({ message: 'Account created', username });
 });
@@ -476,7 +498,7 @@ app.post('/api/auth/signup', async (req, res) => {
   if (users.has(username.toLowerCase()))
     return res.status(409).json({ error: 'Username already taken' });
   const hash = await bcrypt.hash(password, 12);
-  users.set(username.toLowerCase(), { username, passwordHash: hash, role: 'checker', createdAt: new Date().toISOString() });
+  users.set(username.toLowerCase(), { username, userId: generateUserId(), passwordHash: hash, role: 'checker', createdAt: new Date().toISOString() });
   if (config.requireInviteCode && inviteCode) {
     const inv = invites[inviteCode.toUpperCase()];
     if (inv) {
@@ -559,7 +581,13 @@ app.post('/api/admin/broadcast', requireAdmin, (req, res) => {
 // ─── Global Chat ─────────────────────────────────────────────────────────────
 app.get('/api/chat/messages', requireAuth, (req, res) => {
   const limit = Math.min(parseInt(req.query.limit, 10) || 100, 300);
-  const list = Array.isArray(globalChat) ? globalChat.slice(-limit) : [];
+  const list = (Array.isArray(globalChat) ? globalChat.slice(-limit) : []).map(m => {
+    const u = users.get(String(m.by || '').toLowerCase());
+    return {
+      ...m,
+      userId: m.userId || u?.userId || null,
+    };
+  });
   res.json({ messages: list });
 });
 
@@ -577,6 +605,9 @@ app.post('/api/chat/messages', requireAuth, (req, res) => {
 
   const userObj = users.get(req.user.username.toLowerCase());
   if (!userObj) return res.status(404).json({ error: 'User not found' });
+  const hadUserId = !!userObj.userId;
+  const userId = ensureUserId(userObj);
+  if (!hadUserId) persistUsers();
 
   if (userObj.chatMutedUntil) {
     const mutedUntilMs = new Date(userObj.chatMutedUntil).getTime();
@@ -597,6 +628,7 @@ app.post('/api/chat/messages', requireAuth, (req, res) => {
     id: uuidv4(),
     text,
     by: req.user.username,
+    userId,
     role,
     badges,
     timestamp: new Date().toISOString(),
@@ -646,11 +678,41 @@ app.post('/api/chat/mute', requireAdmin, (req, res) => {
   const muteMs = Math.min(hours, 24 * 30) * 60 * 60 * 1000;
   const mutedUntil = new Date(Date.now() + muteMs).toISOString();
   target.chatMutedUntil = mutedUntil;
+  const userId = ensureUserId(target);
   persistUsers();
 
   addAudit('chat_user_muted', req.user.username, { target: target.username, hours: Math.min(hours, 24 * 30) });
   io.to(`user:${target.username}`).emit('chat_muted', { mutedUntil, by: req.user.username });
-  res.json({ message: 'User muted', username: target.username, mutedUntil });
+  res.json({ message: 'User muted', username: target.username, userId, mutedUntil });
+});
+
+app.get('/api/chat/muted', requireAdmin, (req, res) => {
+  const now = Date.now();
+  const muted = Array.from(users.values())
+    .filter(u => u.chatMutedUntil && new Date(u.chatMutedUntil).getTime() > now)
+    .map(u => ({ username: u.username, userId: ensureUserId(u), mutedUntil: u.chatMutedUntil }))
+    .sort((a, b) => new Date(a.mutedUntil) - new Date(b.mutedUntil));
+  persistUsers();
+  res.json({ muted });
+});
+
+app.post('/api/chat/unmute', requireAdmin, (req, res) => {
+  const userId = String(req.body?.userId || '').trim().toUpperCase();
+  if (!userId) return res.status(400).json({ error: 'userId is required' });
+
+  const target = Array.from(users.values()).find(u => String(u.userId || '').toUpperCase() === userId);
+  if (!target) return res.status(404).json({ error: 'User not found for this ID' });
+  if (!target.chatMutedUntil || new Date(target.chatMutedUntil).getTime() <= Date.now()) {
+    delete target.chatMutedUntil;
+    persistUsers();
+    return res.status(400).json({ error: 'User is not currently muted' });
+  }
+
+  delete target.chatMutedUntil;
+  persistUsers();
+  addAudit('chat_user_unmuted', req.user.username, { target: target.username, userId });
+  io.to(`user:${target.username}`).emit('chat_unmuted', { by: req.user.username });
+  res.json({ message: 'User unmuted', username: target.username, userId });
 });
 
 
