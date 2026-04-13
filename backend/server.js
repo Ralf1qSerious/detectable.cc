@@ -43,9 +43,12 @@ const TEMPLATES_FILE = path.join(DATA_DIR, 'templates.json');
 const CHAT_FILE      = path.join(DATA_DIR, 'chat.json');
 
 // ─── Persistent storage helpers ──────────────────────────────────────────────
+let storageAvailable = true;
+
 try {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 } catch (e) {
+  storageAvailable = false;
   console.warn(`[warn] Could not create DATA_DIR (${DATA_DIR}): ${e.message}. Using in-memory only.`);
 }
 
@@ -53,7 +56,15 @@ function loadJSON(file, fallback = {}) {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; }
 }
 function saveJSON(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2));
+  if (!storageAvailable) return false;
+  try {
+    fs.writeFileSync(file, JSON.stringify(data, null, 2));
+    return true;
+  } catch (e) {
+    storageAvailable = false;
+    console.warn(`[warn] Could not write data file (${file}): ${e.message}. Using in-memory only.`);
+    return false;
+  }
 }
 
 // ─── In-Memory Stores ────────────────────────────────────────────────────────
