@@ -563,12 +563,33 @@ app.get('/api/chat/messages', requireAuth, (req, res) => {
   res.json({ messages: list });
 });
 
+app.get('/api/chat/status', requireAuth, (req, res) => {
+  const userObj = users.get(req.user.username.toLowerCase());
+  const mutedUntil = userObj?.chatMutedUntil || null;
+  const isMuted = !!(mutedUntil && new Date(mutedUntil).getTime() > Date.now());
+  res.json({ muted: isMuted, mutedUntil: isMuted ? mutedUntil : null });
+});
+
 app.post('/api/chat/messages', requireAuth, (req, res) => {
   const text = String(req.body?.text || '').trim();
   if (!text) return res.status(400).json({ error: 'Message is required' });
   if (text.length > 500) return res.status(400).json({ error: 'Message is too long (max 500 chars)' });
 
   const userObj = users.get(req.user.username.toLowerCase());
+  if (!userObj) return res.status(404).json({ error: 'User not found' });
+
+  if (userObj.chatMutedUntil) {
+    const mutedUntilMs = new Date(userObj.chatMutedUntil).getTime();
+    if (mutedUntilMs > Date.now()) {
+      return res.status(403).json({
+        error: `You are muted until ${new Date(userObj.chatMutedUntil).toLocaleString()}`,
+        mutedUntil: userObj.chatMutedUntil,
+      });
+    }
+    delete userObj.chatMutedUntil;
+    persistUsers();
+  }
+
   const role = userObj?.role || req.user.role || 'checker';
   const badges = Array.isArray(userObj?.badges) ? userObj.badges : [];
 
@@ -607,6 +628,29 @@ app.delete('/api/chat/messages', requireAdmin, (req, res) => {
   addAudit('chat_cleared', req.user.username, { count });
   io.emit('chat_cleared', { by: req.user.username });
   res.json({ message: 'Chat cleared', count });
+});
+
+app.post('/api/chat/mute', requireAdmin, (req, res) => {
+  const username = String(req.body?.username || '').trim();
+  const hours = Number(req.body?.hours);
+  if (!username) return res.status(400).json({ error: 'Username is required' });
+  if (!Number.isFinite(hours) || hours <= 0) return res.status(400).json({ error: 'Hours must be a positive number' });
+
+  const key = username.toLowerCase();
+  const target = users.get(key);
+  if (!target) return res.status(404).json({ error: 'User not found' });
+  if (target.username.toLowerCase() === req.user.username.toLowerCase()) {
+    return res.status(400).json({ error: 'You cannot mute yourself' });
+  }
+
+  const muteMs = Math.min(hours, 24 * 30) * 60 * 60 * 1000;
+  const mutedUntil = new Date(Date.now() + muteMs).toISOString();
+  target.chatMutedUntil = mutedUntil;
+  persistUsers();
+
+  addAudit('chat_user_muted', req.user.username, { target: target.username, hours: Math.min(hours, 24 * 30) });
+  io.to(`user:${target.username}`).emit('chat_muted', { mutedUntil, by: req.user.username });
+  res.json({ message: 'User muted', username: target.username, mutedUntil });
 });
 
 

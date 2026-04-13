@@ -91,7 +91,7 @@ let activeFilter  = 'all';
 let createdSessId = null;
 let profileCache  = {}; // name.toLowerCase() → scans[]
 let selectedIds   = new Set();
-const chatState = { messages: [], typingTimer: null };
+const chatState = { messages: [], typingTimer: null, mutedUntil: null };
 
 const socket = io();
 
@@ -121,6 +121,10 @@ socket.on('chat_typing', ({ by }) => {
   hint.textContent = `${by} is typing...`;
   if (chatState.typingTimer) clearTimeout(chatState.typingTimer);
   chatState.typingTimer = setTimeout(() => { hint.textContent = ''; }, 1300);
+});
+socket.on('chat_muted', ({ mutedUntil }) => {
+  setChatMutedState(mutedUntil || null);
+  toast(`Chat muted until ${new Date(mutedUntil).toLocaleString()}`, 'warn');
 });
 
 // Notification bell
@@ -283,20 +287,15 @@ function renderSessions() {
 
 // ─── Global chat ─────────────────────────────────────────────────────────────
 function _chatBadges(msg) {
-  const out = [];
   if ((msg.role || '').toLowerCase() === 'admin') {
-    out.push('<span class="chat-badge chat-badge-admin">Admin</span>');
+    return '<span class="chat-badge chat-badge-admin">Admin</span>';
   }
-  const map = {
-    verified: 'chat-badge-verified',
-    trusted: 'chat-badge-trusted',
-    vip: 'chat-badge-vip',
-  };
   for (const b of (Array.isArray(msg.badges) ? msg.badges : [])) {
-    const cls = map[String(b).toLowerCase()];
-    if (cls) out.push(`<span class="chat-badge ${cls}">${esc(String(b))}</span>`);
+    if (String(b).toLowerCase() === 'verified') {
+      return '<span class="chat-badge chat-badge-verified">Verified</span>';
+    }
   }
-  return out.join('');
+  return '';
 }
 
 function _chatTime(iso) {
@@ -316,6 +315,9 @@ function renderChatMessages(scrollBottom = false) {
     return;
   }
   list.innerHTML = chatState.messages.map(m => {
+    const muteBtn = role === 'admin' && (m.by || '').toLowerCase() !== (user || '').toLowerCase()
+      ? `<button class="chat-delete-btn" onclick="muteChatUser('${encodeURIComponent(m.by || '')}')" title="Mute user">Mute</button>`
+      : '';
     const delBtn = role === 'admin'
       ? `<button class="chat-delete-btn" onclick="deleteChatMessage('${m.id}')" title="Delete message">Delete</button>`
       : '';
@@ -326,7 +328,7 @@ function renderChatMessages(scrollBottom = false) {
           ${_chatBadges(m)}
           <span class="chat-time">${_chatTime(m.timestamp)}</span>
         </div>
-        ${delBtn}
+        <div style="display:flex;align-items:center;gap:8px">${muteBtn}${delBtn}</div>
       </div>
       <div class="chat-text">${esc(m.text)}</div>
     </div>`;
@@ -350,6 +352,10 @@ async function sendChatMessage() {
   const input = document.getElementById('chatInput');
   const btn = document.getElementById('chatSendBtn');
   if (!input || !btn) return;
+  if (chatState.mutedUntil) {
+    toast(`You are muted until ${new Date(chatState.mutedUntil).toLocaleString()}`, 'warn');
+    return;
+  }
   const text = input.value.trim();
   if (!text) return;
   btn.disabled = true;
@@ -385,6 +391,50 @@ async function clearChatMessages() {
   toast('Chat cleared', 'info');
 }
 
+async function muteChatUser(encodedUsername) {
+  if (role !== 'admin') return;
+  const username = decodeURIComponent(encodedUsername || '');
+  const raw = prompt(`Mute ${username} for how many hours?`, '1');
+  if (raw === null) return;
+  const hours = Number(raw);
+  if (!Number.isFinite(hours) || hours <= 0) {
+    toast('Enter a valid positive hour value', 'error');
+    return;
+  }
+  const res = await apiFetch('/api/chat/mute', 'POST', { username, hours });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    toast(data.error || 'Mute failed', 'error');
+    return;
+  }
+  toast(`${username} muted for ${hours}h`, 'success');
+}
+
+function setChatMutedState(mutedUntil) {
+  chatState.mutedUntil = mutedUntil;
+  const input = document.getElementById('chatInput');
+  const btn = document.getElementById('chatSendBtn');
+  if (!input || !btn) return;
+  if (mutedUntil) {
+    input.disabled = true;
+    btn.disabled = true;
+    input.placeholder = `Muted until ${new Date(mutedUntil).toLocaleString()}`;
+  } else {
+    input.disabled = false;
+    btn.disabled = false;
+    input.placeholder = 'Type a message...';
+  }
+}
+
+async function loadChatStatus() {
+  try {
+    const res = await apiFetch('/api/chat/status');
+    const data = await res.json();
+    if (!res.ok) return;
+    setChatMutedState(data.muted ? data.mutedUntil : null);
+  } catch {}
+}
+
 function initGlobalChat() {
   const clearBtn = document.getElementById('chatClearBtn');
   if (clearBtn && role === 'admin') clearBtn.classList.remove('hidden');
@@ -397,9 +447,10 @@ function initGlobalChat() {
       }
     });
     input.addEventListener('input', () => {
-      socket.emit('chat_typing', { token });
+      if (!chatState.mutedUntil) socket.emit('chat_typing', { token });
     });
   }
+  loadChatStatus();
   loadChatMessages();
 }
 
