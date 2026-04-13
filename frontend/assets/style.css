@@ -283,6 +283,7 @@ button{font-family:inherit}
 .chat-badge-vip{color:#f7d0ff;background:rgba(155,89,182,.16);border-color:rgba(155,89,182,.3)}
 .chat-badge-trusted{color:#c8f7dc;background:rgba(46,204,113,.13);border-color:rgba(46,204,113,.28)}
 .chat-text{font-size:12.5px;white-space:pre-wrap;word-break:break-word;line-height:1.45}
+.chat-text-deleted{color:var(--text-muted);font-style:italic}
 .chat-delete-btn{background:transparent;border:0;color:var(--text-muted);cursor:pointer;font-size:11px;padding:0 2px}
 .chat-delete-btn:hover{color:var(--red)}
 .global-chat-typing{min-height:16px;padding:0 12px 6px;color:var(--text-muted);font-size:11px}

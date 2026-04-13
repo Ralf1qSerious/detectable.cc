@@ -106,8 +106,11 @@ socket.on('chat_message', ({ message }) => {
   if (chatState.messages.length > 300) chatState.messages = chatState.messages.slice(chatState.messages.length - 300);
   renderChatMessages(true);
 });
-socket.on('chat_deleted', ({ id }) => {
-  chatState.messages = chatState.messages.filter(m => m.id !== id);
+socket.on('chat_deleted', ({ message }) => {
+  if (!message?.id) return;
+  const idx = chatState.messages.findIndex(m => m.id === message.id);
+  if (idx === -1) chatState.messages.push(message);
+  else chatState.messages[idx] = message;
   renderChatMessages(false);
 });
 socket.on('chat_cleared', () => {
@@ -125,6 +128,10 @@ socket.on('chat_typing', ({ by }) => {
 socket.on('chat_muted', ({ mutedUntil }) => {
   setChatMutedState(mutedUntil || null);
   toast(`Chat muted until ${new Date(mutedUntil).toLocaleString()}`, 'warn');
+});
+socket.on('chat_unmuted', () => {
+  setChatMutedState(null);
+  toast('You were unmuted by an admin', 'info');
 });
 
 // Notification bell
@@ -315,12 +322,14 @@ function renderChatMessages(scrollBottom = false) {
     return;
   }
   list.innerHTML = chatState.messages.map(m => {
+    const isDeleted = !!m.deleted;
     const muteBtn = role === 'admin' && (m.by || '').toLowerCase() !== (user || '').toLowerCase()
       ? `<button class="chat-delete-btn" onclick="muteChatUser('${encodeURIComponent(m.by || '')}')" title="Mute user">Mute</button>`
       : '';
     const delBtn = role === 'admin'
       ? `<button class="chat-delete-btn" onclick="deleteChatMessage('${m.id}')" title="Delete message">Delete</button>`
       : '';
+    const deletedText = m.deletedBy ? `Deleted by ${esc(m.deletedBy)}` : 'Deleted by admin';
     return `<div class="chat-row" id="chat-${m.id}">
       <div class="chat-row-head">
         <div class="chat-row-meta">
@@ -329,9 +338,9 @@ function renderChatMessages(scrollBottom = false) {
           ${_chatBadges(m)}
           <span class="chat-time">${_chatTime(m.timestamp)}</span>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">${muteBtn}${delBtn}</div>
+        <div style="display:flex;align-items:center;gap:8px">${isDeleted ? '' : `${muteBtn}${delBtn}`}</div>
       </div>
-      <div class="chat-text">${esc(m.text)}</div>
+      <div class="chat-text${isDeleted ? ' chat-text-deleted' : ''}">${isDeleted ? `${deletedText}...` : esc(m.text)}</div>
     </div>`;
   }).join('');
   if (scrollBottom || nearBottom) list.scrollTop = list.scrollHeight;

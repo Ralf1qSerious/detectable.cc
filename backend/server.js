@@ -28,7 +28,9 @@ const io = new Server(server, {
 // ─── Config ──────────────────────────────────────────────────────────────────
 const PORT       = process.env.PORT       || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'detectable-lv-secret-change-in-prod';
-const DATA_DIR       = path.join(__dirname, 'data');
+const DATA_DIR = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.join(__dirname, 'data');
 const SESSIONS_FILE  = path.join(DATA_DIR, 'sessions.json');
 const USERS_FILE     = path.join(DATA_DIR, 'users.json');
 const AUDIT_FILE     = path.join(DATA_DIR, 'audit.json');
@@ -41,7 +43,7 @@ const TEMPLATES_FILE = path.join(DATA_DIR, 'templates.json');
 const CHAT_FILE      = path.join(DATA_DIR, 'chat.json');
 
 // ─── Persistent storage helpers ──────────────────────────────────────────────
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 function loadJSON(file, fallback = {}) {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; }
@@ -644,12 +646,15 @@ app.post('/api/chat/messages', requireAuth, (req, res) => {
 });
 
 app.delete('/api/chat/messages/:id', requireAdmin, (req, res) => {
-  const before = Array.isArray(globalChat) ? globalChat.length : 0;
-  globalChat = (Array.isArray(globalChat) ? globalChat : []).filter(m => m.id !== req.params.id);
-  if (globalChat.length === before) return res.status(404).json({ error: 'Message not found' });
+  const target = (Array.isArray(globalChat) ? globalChat : []).find(m => m.id === req.params.id);
+  if (!target) return res.status(404).json({ error: 'Message not found' });
+  target.deleted = true;
+  target.deletedBy = req.user.username;
+  target.deletedAt = new Date().toISOString();
+  target.text = '';
   persistChat();
   addAudit('chat_message_deleted', req.user.username, { messageId: req.params.id });
-  io.emit('chat_deleted', { id: req.params.id, by: req.user.username });
+  io.emit('chat_deleted', { message: target });
   res.json({ message: 'Chat message deleted' });
 });
 
