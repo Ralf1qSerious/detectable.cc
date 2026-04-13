@@ -43,7 +43,11 @@ const TEMPLATES_FILE = path.join(DATA_DIR, 'templates.json');
 const CHAT_FILE      = path.join(DATA_DIR, 'chat.json');
 
 // ─── Persistent storage helpers ──────────────────────────────────────────────
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+try {
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+} catch (e) {
+  console.warn(`[warn] Could not create DATA_DIR (${DATA_DIR}): ${e.message}. Using in-memory only.`);
+}
 
 function loadJSON(file, fallback = {}) {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; }
