@@ -91,6 +91,7 @@ let activeFilter  = 'all';
 let createdSessId = null;
 let profileCache  = {}; // name.toLowerCase() → scans[]
 let selectedIds   = new Set();
+const chatState = { messages: [], typingTimer: null };
 
 const socket = io();
 
@@ -99,6 +100,27 @@ socket.on('session_updated', () => loadSessions());
 socket.on('banner_updated', ({ banner }) => renderBanner(banner));
 socket.on('session_expiring', ({ sessionId, targetName, minutesLeft }) => {
   toast(`⚠ Session for "${esc(targetName)}" expires in ${minutesLeft} min`, 'warn');
+});
+socket.on('chat_message', ({ message }) => {
+  chatState.messages.push(message);
+  if (chatState.messages.length > 300) chatState.messages = chatState.messages.slice(chatState.messages.length - 300);
+  renderChatMessages(true);
+});
+socket.on('chat_deleted', ({ id }) => {
+  chatState.messages = chatState.messages.filter(m => m.id !== id);
+  renderChatMessages(false);
+});
+socket.on('chat_cleared', () => {
+  chatState.messages = [];
+  renderChatMessages(false);
+});
+socket.on('chat_typing', ({ by }) => {
+  if (!by || by === user) return;
+  const hint = document.getElementById('chatTypingHint');
+  if (!hint) return;
+  hint.textContent = `${by} is typing...`;
+  if (chatState.typingTimer) clearTimeout(chatState.typingTimer);
+  chatState.typingTimer = setTimeout(() => { hint.textContent = ''; }, 1300);
 });
 
 // Notification bell
@@ -257,6 +279,128 @@ function renderSessions() {
         </div>
       </div>`;
   }).join('');
+}
+
+// ─── Global chat ─────────────────────────────────────────────────────────────
+function _chatBadges(msg) {
+  const out = [];
+  if ((msg.role || '').toLowerCase() === 'admin') {
+    out.push('<span class="chat-badge chat-badge-admin">Admin</span>');
+  }
+  const map = {
+    verified: 'chat-badge-verified',
+    trusted: 'chat-badge-trusted',
+    vip: 'chat-badge-vip',
+  };
+  for (const b of (Array.isArray(msg.badges) ? msg.badges : [])) {
+    const cls = map[String(b).toLowerCase()];
+    if (cls) out.push(`<span class="chat-badge ${cls}">${esc(String(b))}</span>`);
+  }
+  return out.join('');
+}
+
+function _chatTime(iso) {
+  try {
+    return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return '';
+  }
+}
+
+function renderChatMessages(scrollBottom = false) {
+  const list = document.getElementById('globalChatList');
+  if (!list) return;
+  const nearBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 30;
+  if (!chatState.messages.length) {
+    list.innerHTML = '<div class="text-muted" style="font-size:12px;padding:8px">No messages yet.</div>';
+    return;
+  }
+  list.innerHTML = chatState.messages.map(m => {
+    const delBtn = role === 'admin'
+      ? `<button class="chat-delete-btn" onclick="deleteChatMessage('${m.id}')" title="Delete message">Delete</button>`
+      : '';
+    return `<div class="chat-row" id="chat-${m.id}">
+      <div class="chat-row-head">
+        <div class="chat-row-meta">
+          <span class="chat-by">${esc(m.by || 'Unknown')}</span>
+          ${_chatBadges(m)}
+          <span class="chat-time">${_chatTime(m.timestamp)}</span>
+        </div>
+        ${delBtn}
+      </div>
+      <div class="chat-text">${esc(m.text)}</div>
+    </div>`;
+  }).join('');
+  if (scrollBottom || nearBottom) list.scrollTop = list.scrollHeight;
+}
+
+async function loadChatMessages() {
+  try {
+    const res = await apiFetch('/api/chat/messages?limit=180');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Chat failed');
+    chatState.messages = Array.isArray(data.messages) ? data.messages : [];
+    renderChatMessages(true);
+  } catch (e) {
+    console.error('chat', e);
+  }
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const btn = document.getElementById('chatSendBtn');
+  if (!input || !btn) return;
+  const text = input.value.trim();
+  if (!text) return;
+  btn.disabled = true;
+  try {
+    const res = await apiFetch('/api/chat/messages', 'POST', { text });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to send');
+    input.value = '';
+  } catch (e) {
+    toast(`Chat: ${e.message}`, 'error');
+  }
+  btn.disabled = false;
+}
+
+async function deleteChatMessage(id) {
+  if (role !== 'admin') return;
+  const res = await apiFetch(`/api/chat/messages/${id}`, 'DELETE');
+  if (!res.ok) {
+    const d = await res.json().catch(() => ({}));
+    toast(d.error || 'Delete failed', 'error');
+  }
+}
+
+async function clearChatMessages() {
+  if (role !== 'admin') return;
+  if (!confirm('Clear all global chat messages?')) return;
+  const res = await apiFetch('/api/chat/messages', 'DELETE');
+  if (!res.ok) {
+    const d = await res.json().catch(() => ({}));
+    toast(d.error || 'Clear failed', 'error');
+    return;
+  }
+  toast('Chat cleared', 'info');
+}
+
+function initGlobalChat() {
+  const clearBtn = document.getElementById('chatClearBtn');
+  if (clearBtn && role === 'admin') clearBtn.classList.remove('hidden');
+  const input = document.getElementById('chatInput');
+  if (input) {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+      }
+    });
+    input.addEventListener('input', () => {
+      socket.emit('chat_typing', { token });
+    });
+  }
+  loadChatMessages();
 }
 
 // ─── Sparkline ────────────────────────────────────────────────────────────────
@@ -497,4 +641,5 @@ document.addEventListener('keydown', e => {
 
 loadBanner();
 loadSessions();
+initGlobalChat();
 

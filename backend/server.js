@@ -38,6 +38,7 @@ const CONFIG_FILE    = path.join(DATA_DIR, 'config.json');
 const BANNER_FILE    = path.join(DATA_DIR, 'banner.json');
 const INVITES_FILE   = path.join(DATA_DIR, 'invites.json');
 const TEMPLATES_FILE = path.join(DATA_DIR, 'templates.json');
+const CHAT_FILE      = path.join(DATA_DIR, 'chat.json');
 
 // ─── Persistent storage helpers ──────────────────────────────────────────────
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
@@ -98,6 +99,7 @@ let   config       = { sessionTtlHours: 24, maxSessionsPerChecker: 0, jwtExpiryH
 let   banner       = loadJSON(BANNER_FILE, null);
 let   invites      = loadJSON(INVITES_FILE, {});
 let   templates    = loadJSON(TEMPLATES_FILE, []);
+let   globalChat   = loadJSON(CHAT_FILE, []);
 
 function persistUsers()     { saveJSON(USERS_FILE,    Object.fromEntries(users)); }
 function persistSessions()  { saveJSON(SESSIONS_FILE, Object.fromEntries(sessions)); }
@@ -108,6 +110,7 @@ function persistConfig()    { saveJSON(CONFIG_FILE,    config); }
 function persistBanner()    { saveJSON(BANNER_FILE,    banner); }
 function persistInvites()   { saveJSON(INVITES_FILE,   invites); }
 function persistTemplates() { saveJSON(TEMPLATES_FILE, templates); }
+function persistChat()      { saveJSON(CHAT_FILE,      globalChat); }
 
 if (!fs.existsSync(DISCORD_WEBHOOKS_FILE)) persistDiscordWebhooks();
 
@@ -553,6 +556,59 @@ app.post('/api/admin/broadcast', requireAdmin, (req, res) => {
   res.json({ message: 'Broadcast sent' });
 });
 
+// ─── Global Chat ─────────────────────────────────────────────────────────────
+app.get('/api/chat/messages', requireAuth, (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit, 10) || 100, 300);
+  const list = Array.isArray(globalChat) ? globalChat.slice(-limit) : [];
+  res.json({ messages: list });
+});
+
+app.post('/api/chat/messages', requireAuth, (req, res) => {
+  const text = String(req.body?.text || '').trim();
+  if (!text) return res.status(400).json({ error: 'Message is required' });
+  if (text.length > 500) return res.status(400).json({ error: 'Message is too long (max 500 chars)' });
+
+  const userObj = users.get(req.user.username.toLowerCase());
+  const role = userObj?.role || req.user.role || 'checker';
+  const badges = Array.isArray(userObj?.badges) ? userObj.badges : [];
+
+  const message = {
+    id: uuidv4(),
+    text,
+    by: req.user.username,
+    role,
+    badges,
+    timestamp: new Date().toISOString(),
+  };
+
+  if (!Array.isArray(globalChat)) globalChat = [];
+  globalChat.push(message);
+  if (globalChat.length > 500) globalChat = globalChat.slice(globalChat.length - 500);
+  persistChat();
+
+  io.emit('chat_message', { message });
+  res.json({ message });
+});
+
+app.delete('/api/chat/messages/:id', requireAdmin, (req, res) => {
+  const before = Array.isArray(globalChat) ? globalChat.length : 0;
+  globalChat = (Array.isArray(globalChat) ? globalChat : []).filter(m => m.id !== req.params.id);
+  if (globalChat.length === before) return res.status(404).json({ error: 'Message not found' });
+  persistChat();
+  addAudit('chat_message_deleted', req.user.username, { messageId: req.params.id });
+  io.emit('chat_deleted', { id: req.params.id, by: req.user.username });
+  res.json({ message: 'Chat message deleted' });
+});
+
+app.delete('/api/chat/messages', requireAdmin, (req, res) => {
+  const count = Array.isArray(globalChat) ? globalChat.length : 0;
+  globalChat = [];
+  persistChat();
+  addAudit('chat_cleared', req.user.username, { count });
+  io.emit('chat_cleared', { by: req.user.username });
+  res.json({ message: 'Chat cleared', count });
+});
+
 
 // ─── Profile Notes ─────────────────────────────────────────────────────────────────
 app.get('/api/profiles/:name/notes', requireAuth, (req, res) => {
@@ -762,6 +818,13 @@ io.on('connection', (socket) => {
     try {
       jwt.verify(t, JWT_SECRET);
       socket.join(`session:${sessionId}`);
+    } catch {/* ignore */}
+  });
+
+  socket.on('chat_typing', ({ token: t }) => {
+    try {
+      const payload = jwt.verify(t, JWT_SECRET);
+      socket.broadcast.emit('chat_typing', { by: payload.username });
     } catch {/* ignore */}
   });
 });

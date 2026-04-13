@@ -69,6 +69,22 @@
 
     <div class="app-content">
 
+      <aside class="global-chat-panel" id="globalChatPanel">
+        <div class="global-chat-head">
+          <div>
+            <div class="global-chat-title">Global Chat</div>
+            <div class="global-chat-sub">Visible to all online checkers</div>
+          </div>
+          <button id="chatClearBtn" class="btn btn-danger btn-sm hidden" onclick="clearChatMessages()">Clear</button>
+        </div>
+        <div class="global-chat-list" id="globalChatList"></div>
+        <div class="global-chat-typing" id="chatTypingHint"></div>
+        <div class="global-chat-compose">
+          <textarea id="chatInput" rows="2" maxlength="500" placeholder="Type a message..."></textarea>
+          <button id="chatSendBtn" class="btn btn-primary" onclick="sendChatMessage()">Send</button>
+        </div>
+      </aside>
+
       <!-- Announcement banner -->
       <div id="announcementBanner" style="display:none"></div>
 
