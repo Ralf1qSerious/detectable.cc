@@ -28,35 +28,53 @@ const io = new Server(server, {
 // ─── Config ──────────────────────────────────────────────────────────────────
 const PORT       = process.env.PORT       || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'detectable-lv-secret-change-in-prod';
-const DATA_DIR = process.env.DATA_DIR
+const DEFAULT_DATA_DIR = path.join(__dirname, 'data');
+const REQUESTED_DATA_DIR = process.env.DATA_DIR
   ? path.resolve(process.env.DATA_DIR)
-  : path.join(__dirname, 'data');
-const SESSIONS_FILE  = path.join(DATA_DIR, 'sessions.json');
-const USERS_FILE     = path.join(DATA_DIR, 'users.json');
-const AUDIT_FILE     = path.join(DATA_DIR, 'audit.json');
-const DISCORD_WEBHOOKS_FILE = path.join(DATA_DIR, 'discord-webhooks.json');
-const NOTES_FILE     = path.join(DATA_DIR, 'notes.json');
-const CONFIG_FILE    = path.join(DATA_DIR, 'config.json');
-const BANNER_FILE    = path.join(DATA_DIR, 'banner.json');
-const INVITES_FILE   = path.join(DATA_DIR, 'invites.json');
-const TEMPLATES_FILE = path.join(DATA_DIR, 'templates.json');
-const CHAT_FILE      = path.join(DATA_DIR, 'chat.json');
+  : DEFAULT_DATA_DIR;
+
+function ensureWritableDir(dirPath) {
+  try {
+    if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
+    return true;
+  } catch (e) {
+    console.warn(`[warn] Could not create data directory (${dirPath}): ${e.message}`);
+    return false;
+  }
+}
+
+const DATA_DIR = ensureWritableDir(REQUESTED_DATA_DIR)
+  ? REQUESTED_DATA_DIR
+  : (REQUESTED_DATA_DIR !== DEFAULT_DATA_DIR && ensureWritableDir(DEFAULT_DATA_DIR) ? DEFAULT_DATA_DIR : null);
+
+function dataFile(name) {
+  return DATA_DIR ? path.join(DATA_DIR, name) : null;
+}
+
+const SESSIONS_FILE  = dataFile('sessions.json');
+const USERS_FILE     = dataFile('users.json');
+const AUDIT_FILE     = dataFile('audit.json');
+const DISCORD_WEBHOOKS_FILE = dataFile('discord-webhooks.json');
+const NOTES_FILE     = dataFile('notes.json');
+const CONFIG_FILE    = dataFile('config.json');
+const BANNER_FILE    = dataFile('banner.json');
+const INVITES_FILE   = dataFile('invites.json');
+const TEMPLATES_FILE = dataFile('templates.json');
+const CHAT_FILE      = dataFile('chat.json');
 
 // ─── Persistent storage helpers ──────────────────────────────────────────────
-let storageAvailable = true;
+let storageAvailable = !!DATA_DIR;
 
-try {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-} catch (e) {
-  storageAvailable = false;
-  console.warn(`[warn] Could not create DATA_DIR (${DATA_DIR}): ${e.message}. Using in-memory only.`);
+if (!storageAvailable) {
+  console.warn('[warn] No writable data directory available. Using in-memory only.');
 }
 
 function loadJSON(file, fallback = {}) {
+  if (!file) return fallback;
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; }
 }
 function saveJSON(file, data) {
-  if (!storageAvailable) return false;
+  if (!storageAvailable || !file) return false;
   try {
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
     return true;
@@ -150,7 +168,7 @@ function ensureAllUserIds() {
   if (changed) persistUsers();
 }
 
-if (!fs.existsSync(DISCORD_WEBHOOKS_FILE)) persistDiscordWebhooks();
+if (DISCORD_WEBHOOKS_FILE && !fs.existsSync(DISCORD_WEBHOOKS_FILE)) persistDiscordWebhooks();
 
 function auditCategory(action = '') {
   if (action.startsWith('login') || action.startsWith('password_')) return 'security';

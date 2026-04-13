@@ -302,6 +302,8 @@ button{font-family:inherit}
   padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px;
 }
 .chat-action-item:hover{background:var(--bg3)}
+.chat-action-item:disabled{color:var(--text-dim);cursor:not-allowed}
+.chat-action-item:disabled:hover{background:transparent}
 .chat-action-danger{color:var(--red)}
 .chat-delete-btn{background:transparent;border:0;color:var(--text-muted);cursor:pointer;font-size:11px;padding:0 2px}
 .chat-delete-btn:hover{color:var(--red)}

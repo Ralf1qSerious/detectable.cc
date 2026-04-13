@@ -324,11 +324,16 @@ function renderChatMessages(scrollBottom = false) {
   list.innerHTML = chatState.messages.map(m => {
     const isDeleted = !!m.deleted;
     const canMute = role === 'admin' && (m.by || '').toLowerCase() !== (user || '').toLowerCase();
+    const muteAction = role === 'admin'
+      ? (canMute
+          ? `<button class="chat-action-item" onclick="muteChatUser('${encodeURIComponent(m.by || '')}');this.closest('details').open=false;">Mute</button>`
+          : `<button class="chat-action-item" disabled title="You cannot mute yourself">Mute</button>`)
+      : '';
     const actionsMenu = role === 'admin' && !isDeleted
       ? `<details class="chat-actions">
           <summary class="chat-ellipsis-btn" title="Actions">...</summary>
           <div class="chat-actions-menu">
-            ${canMute ? `<button class="chat-action-item" onclick="muteChatUser('${encodeURIComponent(m.by || '')}');this.closest('details').open=false;">Mute</button>` : ''}
+            ${muteAction}
             <button class="chat-action-item chat-action-danger" onclick="deleteChatMessage('${m.id}');this.closest('details').open=false;">Delete</button>
           </div>
         </details>`
